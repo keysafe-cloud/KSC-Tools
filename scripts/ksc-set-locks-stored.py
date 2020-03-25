@@ -1,6 +1,21 @@
 #!/usr/bin/python
 # coding=utf-8
 
+"""
+Script to help setting locks from 'active' to 'stored' lock status.
+
+It gets all locks of the tenant based on the KSC API Access Key provided,
+filters this list for locks that have the 'active' lock status, then asks
+user for approval to process these locks by setting locks to 'stored'.
+
+NOTE: It is recommended to provide the KSC API Access Key via command-line
+      parameters (rather than changing 'SECRET' in a copy of this script).
+      Please protect your API Key as described in the API documentation.
+
+Copyright 2018-2020 (c) KeySafe-Cloud, all rights reserved.
+"""
+
+
 import argparse
 import json
 import logging
@@ -30,9 +45,9 @@ def yn_choice(message, default='y'):
   choices = 'Y/n' if default.lower() in ('y', 'yes') else 'y/N'
   try:
     if sys.version_info.major == 2:
-      choice = raw_input("%s (%s) " % (message, choices))
+      choice = raw_input("{} ({}) ".format(message, choices))
     else:
-      choice = input("%s (%s) " % (message, choices))
+      choice = input("{} ({}) ".format(message, choices))
   except:
     logging.error('Problem handling command-line input...')
   values = ('y', 'yes', '') if choices == 'Y/n' else ('y', 'yes')
