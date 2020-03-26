@@ -5,8 +5,8 @@
 Script to help setting locks from 'active' to 'stored' lock status.
 
 It gets all locks of the tenant based on the KSC API Access Key provided,
-filters this list for locks that have the 'active' lock status, then asks
-user for approval to process these locks by setting locks to 'stored'.
+filters this list for locks that have the 'active' lock status; then asks
+the user for approval, before setting their lock status to 'stored'.
 
 NOTE: It is recommended to provide the KSC API Access Key via command-line
       parameters (rather than changing 'SECRET' in a copy of this script).
