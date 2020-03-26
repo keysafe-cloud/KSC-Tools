@@ -12,6 +12,9 @@ NOTE: It is recommended to provide the KSC API Access Key via command-line
       parameters (rather than changing 'SECRET' in a copy of this script).
       Please protect your API Key as described in the API documentation.
 
+This script requires `requests` (see https://pypi.org/project/requests/)
+to be installed, use `pip install -r requirements.txt` to install.
+
 Copyright 2018-2020 (c) KeySafe-Cloud, all rights reserved.
 """
 
@@ -31,7 +34,6 @@ import sys
 TENANT_API_KEY = 'SECRET'
 # =============================================================================
 
-# common constants that can remain as-is
 VERSION = '1.0'
 BASE_URL = 'https://keysafe-cloud.appspot.com/api/v1'
 CRITERIA_LOCK_STATUS = ['active']
