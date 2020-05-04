@@ -34,7 +34,7 @@ import sys
 TENANT_API_KEY = 'SECRET'
 # =============================================================================
 
-VERSION = '1.0'
+VERSION = '1.0.1'
 BASE_URL = 'https://keysafe-cloud.appspot.com/api/v1'
 CRITERIA_LOCK_STATUS = ['active']
 
