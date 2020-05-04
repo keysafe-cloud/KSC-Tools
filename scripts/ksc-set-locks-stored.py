@@ -200,7 +200,7 @@ if __name__ == '__main__':
     action='store_true',
     help='verbose logging output')
 
-  # parse command-line argumentsset_locks_stored
+  # parse command-line arguments
   args = parser.parse_args()
   if args.verbose:
     logging.getLogger().setLevel(logging.DEBUG)
