@@ -29,8 +29,8 @@ import sys
 # =============================================================================
 # NOTE: instead of changing this in the script, it is strongly recommended
 #       to use the command-line parameter `--api_key` to keep your API Key
-#       indeed secret (it will override the TENANT_API_KEY constant here)
-#       (for different (sub-)tenants: use a different API Key in each run)
+#       indeed secret (it will override the TENANT_API_KEY constant here);
+#       for different (sub-)tenants: use a different API Key in each run
 TENANT_API_KEY = 'SECRET'
 # =============================================================================
 
