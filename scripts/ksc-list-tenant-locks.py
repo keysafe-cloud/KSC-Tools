@@ -2,7 +2,7 @@
 # coding=utf-8
 
 """
-Script to help list all locks in the tenant inventory, with the output in
+Script to help list all locks in the tenant inventory, with the output
 either in JSON format or in CSV format (for specified fields).
 
 It gets all locks of the tenant based on the KSC API Access Key provided.
