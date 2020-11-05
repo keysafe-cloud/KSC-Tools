@@ -59,6 +59,11 @@ import argparse
 
 
 def get_lock_status_flags(lock_status_value):
+  """
+  Decode a lock status value provided as a hex string (like '0880'),
+  returning an array of strings representing the parsed bits into
+  textual described flags.
+  """
   flags = []
   try:
     status_value = bytearray.fromhex(lock_status_value)
@@ -102,7 +107,7 @@ def get_lock_status_flags(lock_status_value):
 
 
 def normalize(lock_status_value_input):
-  """Helper routine to normalize command-line input"""
+  """Helper routine to normalize command-line input."""
   lock_status_value = lock_status_value_input.lower()
   for c in '()-_ :;,':
     lock_status_value = lock_status_value.replace(c, '')
@@ -114,15 +119,17 @@ def normalize(lock_status_value_input):
 if __name__ == '__main__':
   # configure command-line parsing
   parser = argparse.ArgumentParser(
-    description="Decode the lock status value as obtained via BLE.")
+    description="Decode the lock status value as obtained via BLE.",
+    epilog="Provide the status_value as a hex string representation of bytes," \
+      " different formats are supported (e.g. '0x0880', '0880', or '08-80').")
   parser.add_argument(
-    'status_value',
+    'status_value', nargs='+',
     help='the status value seen (as a hex string, like: 01 or 08-80)')
 
   # parse command-line arguments
   args = parser.parse_args()
   # normalize the lock status value input
-  lock_status_value = normalize(args.status_value)
+  lock_status_value = normalize(''.join(args.status_value))
 
   # decode the input into an array describing the state bits
   flags = get_lock_status_flags(lock_status_value)
