@@ -30,8 +30,7 @@ on either Android or iOS mobile devices to obtain this value:
   * Click the single arrow down icon to read the lock status value once.
   * Click the multiple arrows down icon to subscribe to notifications,
     which will show any lock status value changes (press for example the
-    button on the eRL2 to see the lock status value changing, and/or insert
-    a plugin in either the eRL1 or eRL2).
+    button on the eRL2 to see the lock status value changing).
 
 IMPORTANT: While the lock is connected via nRF Connect, it can't be found
            by other BLE tools (including your own App) and vice-versa:
