@@ -7,8 +7,8 @@ Copyright 2019-2020 (c) KeySafe-Cloud, all rights reserved.
 Script to decode KeySafe-Cloud (KSC) compatible lock status values as obtained
 from the Bluetooth Low Energy (BLE) interface using the Status Characteristic
 of the Lock Service. Depending on the lock model, the BLE lock status value
-can be either one (for example the AXA eRL1 BLE), two bytes (e.g. the eRL2) or
-even more bytes (reserved for future enhancements).
+can be either one (for example the AXA eRL1 BLE), two bytes (e.g. the eRL2),
+or even more bytes (reserved for future enhancements).
 
 Note that this is about the BLE interface of the lock rather than the KSC API
 (Application Programming Interface) for the cloud.
