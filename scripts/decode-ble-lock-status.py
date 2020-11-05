@@ -18,7 +18,7 @@ help to decode and understand the value obtained with another tool from
 the Status Characteristic of the Lock Service via the BLE interface.
 
 You can for example use the nRF Connect tool (from Nordic Semiconductor)
-on either Android of iOS mobile devices to obtain this value:
+on either Android or iOS mobile devices to obtain this value:
   * Using the nRF Connect App, scan for locks nearby.
   * On the Scanner tab, filtering for 'AXA:' will trim the result.
   * Connect with your selected lock.
