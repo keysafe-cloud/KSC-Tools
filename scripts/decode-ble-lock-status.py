@@ -2,15 +2,18 @@
 # coding=utf-8
 
 """
-Script to decode the AXA Electronic Ring Lock (AXA eRL) lock status value
-as provided over Bluetooth Low Energy (BLE) to a connected device. It is
-compatible with both the eRL1 (1 byte) and the eRL2 (2 byte) format.
+Script to decode KeySafe-Cloud (KSC) compatible lock status values as obtained
+from the Bluetooth Low Energy (BLE) interface using the Status Characteristic
+of the Lock Service. Depending on the lock model, the BLE lock status value
+can be either one (for example the AXA eRL1 BLE), two bytes (e.g. the eRL2) or
+even more bytes (reserved for future enhancements).
 
-Note that this is about the BLE interface rather than the KSC API.
+Note that this is about the BLE interface of the lock rather than the KSC API
+(Application Programming Interface) for the cloud.
 
 While this script will not connect to the lock itself over BLE, it can
 help to decode and understand the value obtained with another tool from
-the Status characteristic of the Lock service via the BLE interface.
+the Status Characteristic of the Lock Service via the BLE interface.
 
 You can for example use the nRF Connect tool (from Nordic Semiconductor)
 on either Android of iOS mobile devices to obtain this value:
@@ -18,22 +21,24 @@ on either Android of iOS mobile devices to obtain this value:
   * On the Scanner tab, filtering for 'AXA:' will trim the result.
   * Connect with your selected lock.
   * Expand the 'Unknown Service' / '00001523-e513-11e5-9260-0002a5d5c51b'
-    (this is the Lock Service of the AXA eRL lock, aka 0x1523).
-  * Locate the Status characteristic '00001524-e513-11e5-9260-0002a5d5c51b'
+    (this is the Lock Service of the lock, aka 0x1523).
+  * Locate the Status Characteristic '00001524-e513-11e5-9260-0002a5d5c51b'
     which will be one of the 'Unknown Characteristic' entries (note that
     this is unknown to nRF Connect, as it is not a well-known standard).
   * Click the single arrow down icon to read the lock status value once.
   * Click the multiple arrows down icon to subscribe to notifications,
     which will show any lock status value changes (press for example the
-    button on the eRL2 to see the lock status value changing).
+    button on the eRL2 to see the lock status value changing, and/or insert
+    a plugin in either the eRL1 or eRL2).
 
 IMPORTANT: While the lock is connected via nRF Connect, it can't be found
            by other BLE tools (including your own App) and vice-versa:
            the nRF Connect App might not find your lock when another App
-           or tool is connected with the AXA eRL lock.
+           or tool is connected with the lock. Therefore, disconnect the
+           device in the nRF Connect tool afterwards.
 
 When developing an App, logging the observed BLE lock status value will
-of course help you understand the lock behavior (note: use notifications).
+of course help you understand the lock behavior (note: use Notifications).
 This script can then help to decode such observed values and compare it
 with the logic and understanding in your App code.
 
@@ -99,7 +104,7 @@ def get_lock_status_flags(lock_status_value):
 def normalize(lock_status_value_input):
   """Helper routine to normalize command-line input"""
   lock_status_value = lock_status_value_input.lower()
-  for c in '()-_ ':
+  for c in '()-_ :;,':
     lock_status_value = lock_status_value.replace(c, '')
   if lock_status_value.startswith('0x'):
     lock_status_value = lock_status_value[2:]
@@ -109,10 +114,10 @@ def normalize(lock_status_value_input):
 if __name__ == '__main__':
   # configure command-line parsing
   parser = argparse.ArgumentParser(
-    description="Decode the AXA eRL lock status value.")
+    description="Decode the lock status value as obtained via BLE.")
   parser.add_argument(
     'status_value',
-    help='the status value seen (as a hex string, like: 01)')
+    help='the status value seen (as a hex string, like: 01 or 08-80)')
 
   # parse command-line arguments
   args = parser.parse_args()
