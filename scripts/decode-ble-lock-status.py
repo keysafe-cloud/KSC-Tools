@@ -14,18 +14,18 @@ the Status characteristic of the Lock service via the BLE interface.
 
 You can for example use the nRF Connect tool (from Nordic Semiconductor)
 on either Android of iOS mobile devices to obtain this value:
-- Using the nRF Connect App, scan for locks nearby
-- On the Scanner tab, filtering for 'AXA:' will trim the result
-- Connect with your selected lock
-- Expand the 'Unknown Service' / '00001523-e513-11e5-9260-0002a5d5c51b'
-  (this is the Lock Service of the AXA eRL lock, aka 0x1523)
-- Locate the Status characteristic '00001524-e513-11e5-9260-0002a5d5c51b'
-  which will be one of the 'Unknown Characteristic' entries (note that
-  this is unknown to nRF Connect, as it is not a well-known standard)
-- Click the single arrow down icon to read the lock status value once
-- Click the multiple arrows down icon to subscribe to notifications,
-  which will show any lock status value changes (press for example the
-  button on the eRL2 to see the lock status value changing)
+  * Using the nRF Connect App, scan for locks nearby.
+  * On the Scanner tab, filtering for 'AXA:' will trim the result.
+  * Connect with your selected lock.
+  * Expand the 'Unknown Service' / '00001523-e513-11e5-9260-0002a5d5c51b'
+    (this is the Lock Service of the AXA eRL lock, aka 0x1523).
+  * Locate the Status characteristic '00001524-e513-11e5-9260-0002a5d5c51b'
+    which will be one of the 'Unknown Characteristic' entries (note that
+    this is unknown to nRF Connect, as it is not a well-known standard).
+  * Click the single arrow down icon to read the lock status value once.
+  * Click the multiple arrows down icon to subscribe to notifications,
+    which will show any lock status value changes (press for example the
+    button on the eRL2 to see the lock status value changing).
 
 IMPORTANT: While the lock is connected via nRF Connect, it can't be found
            by other BLE tools (including your own App) and vice-versa:
@@ -37,32 +37,33 @@ of course help you understand the lock behavior (note: use notifications).
 This script can then help to decode such observed values and compare it
 with the logic and understanding in your App code.
 
-Examples of script commands and results (for an eRL2):
+Examples of script usage and results:
+  $ python decode-ble-lock-status.py 01
+  0x01 : closed
   $ python decode-ble-lock-status.py 0x0080
   0x0080 : open, button-pressed
   $ python decode-ble-lock-status.py '(0x) 08-80'
   0x0880 : open, child-safety, button-pressed
-  $ python decode-ble-lock-status.py 0100
+  $ python decode-ble-lock-status.py 01-00
   0x0100 : closed
 
 Copyright 2019-2020 (c) KeySafe-Cloud, all rights reserved.
 """
 
 import argparse
-import binascii
 
 
 def get_lock_status_flags(lock_status_value):
   flags = []
   try:
-    status_value = binascii.unhexlify(lock_status_value)
+    status_value = bytearray.fromhex(lock_status_value)
     if not status_value:
       return ['NO-INPUT-ERROR']
   except:
     return ['BAD-INPUT-ERROR']
   # check first status byte
   if len(status_value) >= 1:
-    if hex(status_value[0]) == '0xff':
+    if status_value[0] == 0xff:
       flags.append('unknown-status')
     else:
       if (status_value[0] & 0x01):
@@ -81,7 +82,7 @@ def get_lock_status_flags(lock_status_value):
         flags.append('unsecured-plugin')
     # check second status byte (available for eRL2-2019+)
     if len(status_value) >= 2:
-      if hex(status_value[1]) == '0xff':
+      if status_value[1] == 0xff:
         flags.append('unknown-extended')
       else:
         if status_value[1] & 0x01:
