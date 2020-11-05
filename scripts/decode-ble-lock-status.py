@@ -6,7 +6,7 @@ Script to decode the AXA Electronic Ring Lock (AXA eRL) lock status value
 as provided over Bluetooth Low Energy (BLE) to a connected device. It is
 compatible with both the eRL1 (1 byte) and the eRL2 (2 byte) format.
 
-Note that this explains the BLE interface value; rather than the KSC API.
+Note that this is about the BLE interface rather than the KSC API.
 
 While this script will not connect to the lock itself over BLE, it can
 help to decode and understand the value obtained with another tool from
