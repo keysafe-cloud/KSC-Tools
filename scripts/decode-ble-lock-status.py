@@ -37,6 +37,14 @@ of course help you understand the lock behavior (note: use notifications).
 This script can then help to decode such observed values and compare it
 with the logic and understanding in your App code.
 
+Examples of script commands and results (for an eRL2):
+  $ python decode-ble-lock-status.py 0x0080
+  0x0080 : open, button-pressed
+  $ python decode-ble-lock-status.py '(0x) 08-80'
+  0x0880 : open, child-safety, button-pressed
+  $ python decode-ble-lock-status.py 0100
+  0x0100 : closed
+
 Copyright 2019-2020 (c) KeySafe-Cloud, all rights reserved.
 """
 
