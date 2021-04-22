@@ -14,7 +14,7 @@ NOTE: It is recommended to provide the KSC API Access Key via command-line
 This script requires `requests` (see https://pypi.org/project/requests/)
 to be installed, use `pip install -r requirements.txt` to install.
 
-Copyright 2019-2020 (c) KeySafe-Cloud, all rights reserved.
+Copyright 2019-2021 (c) KeySafe-Cloud, all rights reserved.
 """
 
 
@@ -33,7 +33,7 @@ import sys
 TENANT_API_KEY = 'SECRET'
 # =============================================================================
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 BASE_URL = 'https://keysafe-cloud.appspot.com/api/v1'
 
 
