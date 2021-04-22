@@ -35,7 +35,6 @@ TENANT_API_KEY = 'SECRET'
 
 VERSION = '1.0.0'
 BASE_URL = 'https://keysafe-cloud.appspot.com/api/v1'
-CRITERIA_LOCK_STATUS = ['active']
 
 
 def yn_choice(message, default='y'):
