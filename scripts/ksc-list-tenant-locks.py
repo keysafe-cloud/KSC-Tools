@@ -143,7 +143,8 @@ if __name__ == '__main__':
   parser.add_argument(
     '--format', '--fmt',
     type=str, default='json',
-    help='provide result in specified format (default "json" for JSON output); for example: "id,lock_uid,lock_status" would allow CSV output)')
+    help='provide result in specified format (default "json" for JSON output); '
+         'for example: "id,lock_uid,lock_status" would allow CSV output)')
   parser.add_argument(
     '--out',
     help='write result to specified filename')
