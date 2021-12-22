@@ -34,7 +34,7 @@ import sys
 TENANT_API_KEY = 'SECRET'
 # =============================================================================
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 BASE_URL = 'https://keysafe-cloud.appspot.com/api/v1'
 CRITERIA_LOCK_STATUS = ['active']
 
@@ -65,10 +65,8 @@ def get_locks_url(limit=0):
   '''
   url = BASE_URL.strip().rstrip('/') + '/locks'
   if limit:
-    if '?' in url:
-      url = url + '&limit={}'.format(args.limit)
-    else:
-      url = url + '?limit={}'.format(args.limit)
+    prefix = '&' if ('?' in url) else '?'
+    url = '{0}{1}limit={2}'.format(url, prefix, limit)
   return url
 
 
