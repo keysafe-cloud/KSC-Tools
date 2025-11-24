@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-# coding=utf-8
+# Copyright 2019-2026 (c) KeySafe-Cloud, all rights reserved.
 
 """
-Copyright 2019-2020 (c) KeySafe-Cloud, all rights reserved.
-
 Script to decode KeySafe-Cloud (KSC) compatible lock status values as obtained
 from the Bluetooth Low Energy (BLE) interface using the Status Characteristic
 of the Lock Service. Depending on the lock model, the BLE lock status value

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding=utf-8
+# Copyright 2019-2026 (c) KeySafe-Cloud, all rights reserved.
 
 """
 Script to help list all locks in the tenant inventory, with the output
@@ -13,8 +12,6 @@ NOTE: It is recommended to provide the KSC API Access Key via command-line
 
 This script requires `requests` (see https://pypi.org/project/requests/)
 to be installed, use `pip install -r requirements.txt` to install.
-
-Copyright 2019-2021 (c) KeySafe-Cloud, all rights reserved.
 """
 
 
