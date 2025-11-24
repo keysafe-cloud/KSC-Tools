@@ -52,83 +52,92 @@ Examples of script usage and results:
 """
 
 import argparse
+import logging
+
+# configure the logging
+logging.basicConfig(format="%(message)s", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def get_lock_status_flags(lock_status_value):
-  """
-  Decode a lock status value provided as a hex string (like '0880'),
-  returning an array of strings representing the parsed bits into
-  textual described flags.
-  """
-  flags = []
-  try:
-    status_value = bytearray.fromhex(lock_status_value)
-    if not status_value:
-      return ['NO-INPUT-ERROR']
-  except:
-    return ['BAD-INPUT-ERROR']
-  # check first status byte
-  if len(status_value) >= 1:
-    if status_value[0] == 0xff:
-      flags.append('unknown-status')
+    """
+    Decode a lock status value provided as a hex string (like '0880'),
+    returning an array of strings representing the parsed bits into
+    textual described flags.
+    """
+    flags = []
+    try:
+        status_value = bytearray.fromhex(lock_status_value)
+        if not status_value:
+            return ["NO-INPUT-ERROR"]
+    except ValueError as e:
+        logger.warning(f"Encountered parsing error: {e}")
+        return ["BAD-INPUT-ERROR"]
+    # check first status byte
+    if len(status_value) >= 1:
+        if status_value[0] == 0xFF:
+            flags.append("unknown-status")
+        else:
+            if status_value[0] & 0x01:
+                # matches 0b00000001
+                flags.append("closed")
+            else:
+                flags.append("open")
+            if status_value[0] & 0x08:
+                # matches 0b00001000
+                flags.append("child-safety")
+            if status_value[0] & 0x10:
+                # matches 0b00010000 (available for eRL2-2019+)
+                flags.append("secured-plugin")
+            if status_value[0] & 0x80:
+                # matches 0b10000000 (available for eRL2-2019+)
+                flags.append("unsecured-plugin")
+        # check second status byte (available for eRL2-2019+)
+        if len(status_value) >= 2:
+            if status_value[1] == 0xFF:
+                flags.append("unknown-extended")
+            else:
+                if status_value[1] & 0x01:
+                    # matches 0b00000001
+                    flags.append("smart-plugin")
+                if status_value[1] & 0x80:
+                    # matches 0b10000000
+                    flags.append("button-pressed")
     else:
-      if (status_value[0] & 0x01):
-        # matches 0b00000001
-        flags.append('closed')
-      else:
-        flags.append('open')
-      if status_value[0] & 0x08:
-        # matches 0b00001000
-        flags.append('child-safety')
-      if status_value[0] & 0x10:
-        # matches 0b00010000 (available for eRL2-2019+)
-        flags.append('secured-plugin')
-      if status_value[0] & 0x80:
-        # matches 0b10000000 (available for eRL2-2019+)
-        flags.append('unsecured-plugin')
-    # check second status byte (available for eRL2-2019+)
-    if len(status_value) >= 2:
-      if status_value[1] == 0xff:
-        flags.append('unknown-extended')
-      else:
-        if status_value[1] & 0x01:
-          # matches 0b00000001
-          flags.append('smart-plugin')
-        if status_value[1] & 0x80:
-          # matches 0b10000000
-          flags.append('button-pressed')
-  else:
-    flags.append('missing-status-value')
-  return flags
+        flags.append("missing-status-value")
+    return flags
 
 
 def normalize(lock_status_value_input):
-  """Helper routine to normalize command-line input."""
-  lock_status_value = lock_status_value_input.lower()
-  for c in '()-_ :;,':
-    lock_status_value = lock_status_value.replace(c, '')
-  if lock_status_value.startswith('0x'):
-    lock_status_value = lock_status_value[2:]
-  return lock_status_value
+    """Helper routine to normalize command-line input."""
+    lock_status_value = lock_status_value_input.lower()
+    for c in "()-_ :;,":
+        lock_status_value = lock_status_value.replace(c, "")
+    if lock_status_value.startswith("0x"):
+        lock_status_value = lock_status_value[2:]
+    return lock_status_value
 
 
-if __name__ == '__main__':
-  # configure command-line parsing
-  parser = argparse.ArgumentParser(
-    description="Decode the lock status value as obtained via BLE.",
-    epilog="Provide the status_value as a hex string representation of bytes," \
-      " different formats are supported (e.g. '0x0880', '0880', or '08-80').")
-  parser.add_argument(
-    'status_value', nargs='+',
-    help='the status value seen (as a hex string, like: 01 or 08-80)')
+if __name__ == "__main__":
+    # configure command-line parsing
+    parser = argparse.ArgumentParser(
+        description="Decode the lock status value as obtained via BLE.",
+        epilog="Provide the status_value as a hex string representation of bytes, "
+        "different formats are supported (e.g. '0x0880', '0880', or '08-80').",
+    )
+    parser.add_argument(
+        "status_value",
+        nargs="+",
+        help="the status value seen (as a hex string, like: 01 or 08-80)",
+    )
 
-  # parse command-line arguments
-  args = parser.parse_args()
-  # normalize the lock status value input
-  lock_status_value = normalize(''.join(args.status_value))
+    # parse command-line arguments
+    args = parser.parse_args()
+    # normalize the lock status value input
+    lock_status_value = normalize("".join(args.status_value))
 
-  # decode the input into an array describing the state bits
-  flags = get_lock_status_flags(lock_status_value)
-  # merge the flags into one string for output
-  str_flags = ', '.join(flags)
-  print('0x{} : {}'.format(lock_status_value, str_flags))
+    # decode the input into an array describing the state bits
+    flags = get_lock_status_flags(lock_status_value)
+    # merge the flags into one string for output
+    str_flags = ", ".join(flags)
+    logger.info("0x{} : {}".format(lock_status_value, str_flags))
