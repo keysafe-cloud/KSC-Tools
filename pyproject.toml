@@ -13,9 +13,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "black>=25.11.0",
     "ruff>=0.14.6",
     "ty>=0.0.1a27",
 ]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
 
 [tool.ruff]
 line-length = 100

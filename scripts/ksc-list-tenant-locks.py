@@ -39,14 +39,13 @@ from pathlib import Path
 import requests
 import xlsxwriter
 from dotenv import load_dotenv
-from xlsxwriter.utility import xl_col_to_name
-
 from helpers.utils import (
     ensure_file_extension,
     obfuscate,
     unique_ordered_list,
     yn_choice,
 )
+from xlsxwriter.utility import xl_col_to_name
 
 
 VERSION = "1.2.2"
@@ -279,7 +278,7 @@ def reduce_data(data: list[dict], flds: list[str]) -> tuple[list[dict], list[str
 
 
 if __name__ == "__main__":
-    dt_now = datetime.datetime.now()
+    dt_now = datetime.datetime.now(datetime.UTC).astimezone()
     # configure command-line parsing
     parser = argparse.ArgumentParser(description="List all locks in the tenant inventory.")
     parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")
