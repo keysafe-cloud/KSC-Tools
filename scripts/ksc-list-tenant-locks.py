@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-Script to help list all locks in the tenant inventory.
+Script to list all locks in the KSC tenant inventory.
 
 It gets all locks in the tenant inventory based on the KSC API Access Key (aka API Key) provided.
 When the amount of locks exceeds a certain limit, this script will use the next URL approach
@@ -39,13 +39,14 @@ from pathlib import Path
 import requests
 import xlsxwriter
 from dotenv import load_dotenv
+from xlsxwriter.utility import xl_col_to_name
+
 from helpers.utils import (
     ensure_file_extension,
     obfuscate,
     unique_ordered_list,
     yn_choice,
 )
-from xlsxwriter.utility import xl_col_to_name
 
 
 VERSION = "1.2.2"
@@ -171,7 +172,7 @@ def get_locks(url: str, headers: dict) -> tuple[int, list[dict]]:
         except requests.exceptions.RequestException:
             logger.exception("Request exception.")
             if r and r.text:
-                logger.debug(r.text)
+                logger.warning(r.text)
             sys.exit(1)
     return r_count, lst
 
@@ -360,7 +361,7 @@ if __name__ == "__main__":
         logger.error("No TENANT_API_KEY set in .env file or provided via arguments!")
         sys.exit(1)
     headers = get_headers(args.api_key)
-    _headers = copy.copy(headers)
+    _headers = headers.copy()
     if _headers:
         # protect the TENANT_API_KEY by obfuscating it in the logs
         _headers["X-Api-Key"] = obfuscate(args.api_key)
