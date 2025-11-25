@@ -1,6 +1,7 @@
 [project]
 name = "ksc-tools"
-version = "0.1.0"
+version = "2.2.1"
+license = "MIT"
 description = "Tools, hints and tips for working with the KeySafe-Cloud (KSC) API and compatible locks."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -14,4 +15,35 @@ dependencies = [
 dev = [
     "ruff>=0.14.6",
     "ty>=0.0.1a27",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["bin"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812",   # flake8-commas "Trailing comma missing"
+    "D200",     # allow one-line docstring using multi-line
+    "D203",     # "one-blank-line-before-class" conflicting with D211
+    "D212",     # "multi-line-summary" conflicting with D213
+    "G004",     # allow logging f-string (has performance trade-off)
+    "INP",      # ignore flake8-no-pep420
+    "TD002",    # allow missing-todo-author
+    "TD003",    # allow missing-todo-link
+]
+isort.lines-after-imports = 2
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*.py" = [
+    "S101",     # allow asserts
 ]

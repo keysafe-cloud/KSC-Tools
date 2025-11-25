@@ -79,7 +79,7 @@ wheels = [
 
 [[package]]
 name = "ksc-tools"
-version = "0.1.0"
+version = "2.2.1"
 source = { virtual = "." }
 dependencies = [
     { name = "python-dotenv" },
