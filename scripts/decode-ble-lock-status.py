@@ -1,6 +1,11 @@
+#!/usr/bin/env python
 # Copyright 2019-2026 (c) KeySafe-Cloud, all rights reserved.
+# SPDX-License-Identifier: MIT
+# ruff: noqa: C901, PLR0912, PLR2004
 
 """
+Decode KeySafe-Cloud (KSC) compatible lock status values.
+
 Script to decode KeySafe-Cloud (KSC) compatible lock status values as obtained
 from the Bluetooth Low Energy (BLE) interface using the Status Characteristic
 of the Lock Service. Depending on the lock model, the BLE lock status value
@@ -54,16 +59,21 @@ Examples of script usage and results:
 import argparse
 import logging
 
+
 # configure the logging
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def get_lock_status_flags(lock_status_value):
+def get_lock_status_flags(lock_status_value: str) -> list[str]:
     """
-    Decode a lock status value provided as a hex string (like '0880'),
-    returning an array of strings representing the parsed bits into
+    Decode a lock status value provided as a hex string (like '0880').
+
+    Returning an array of strings representing the parsed bits into
     textual described flags.
+
+    :param lock_status_value: normalized lock status value as hex string
+    :return: list of flags as strings describing the lock status
     """
     flags = []
     try:
@@ -108,14 +118,17 @@ def get_lock_status_flags(lock_status_value):
     return flags
 
 
-def normalize(lock_status_value_input):
-    """Helper routine to normalize command-line input."""
+def normalize(lock_status_value_input: str) -> str:
+    """
+    Normalize the command-line input of lock status value.
+
+    :param lock_status_value_input: command-line input
+    :return: normalized lock status value
+    """
     lock_status_value = lock_status_value_input.lower()
     for c in "()-_ :;,":
         lock_status_value = lock_status_value.replace(c, "")
-    if lock_status_value.startswith("0x"):
-        lock_status_value = lock_status_value[2:]
-    return lock_status_value
+    return lock_status_value.removeprefix("0x")
 
 
 if __name__ == "__main__":
@@ -140,4 +153,4 @@ if __name__ == "__main__":
     flags = get_lock_status_flags(lock_status_value)
     # merge the flags into one string for output
     str_flags = ", ".join(flags)
-    logger.info("0x{} : {}".format(lock_status_value, str_flags))
+    logger.info(f"0x{lock_status_value} : {str_flags}")

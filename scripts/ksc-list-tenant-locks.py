@@ -1,66 +1,74 @@
+#!/usr/bin/env python
 # Copyright 2019-2026 (c) KeySafe-Cloud, all rights reserved.
+# SPDX-License-Identifier: MIT
 
 """
-Script to help list all locks in the tenant inventory, with the output
-either in JSON format or in CSV format (for specified fields).
+Script to help list all locks in the tenant inventory.
 
-It gets all locks of the tenant based on the KSC API Access Key provided.
+It gets all locks in the tenant inventory based on the KSC API Access Key (aka API Key) provided.
+When the amount of locks exceeds a certain limit, this script will use the next URL approach
+to obtain all locks in one list. The number of HTTP requests required to do so will be shown.
 
-NOTE: It is recommended to provide the KSC API Access Key via command-line
-      parameters (rather than changing 'SECRET' in a copy of this script).
+Result can be exported to a file in "csv", "json", or "xlsx" format; for a CSV (comma-separated
+values), JavaScript Object Notation (JSON), or Excel .xslx spreadsheet file.
+
+The fields to include in the export can be specified, allowing easier to read output. By default,
+the fields will be limited to "id,lock_uid,lock_status,reference" for a quick useful overview.
+
+Use `pip install -r requirements.txt` to install `python-dotenv`, `requests`, and `xlsxwriter`
+required libraries. Then use `python ksc-list-tenant-locks.py --help` for usage instructions.
+
+For example, use `python ksc-list-tenant-locks.py --format=xlsx` to generate an Excel file
+with all the locks and their "id,lock_uid,lock_status,reference" fields in a table. The file
+created will follow a `list-locks-YYYY-mm-dd-HHMM.xlsx` snapshot at date/time pattern.
+
+NOTE: It is recommended to set the KSC API Access Key (aka API Key) in a `.env` file or via
+      command-line arguments; rather than hard-coding any 'SECRET' in a copy of this script.
       Please protect your API Key as described in the API documentation.
-
-This script requires `requests` (see https://pypi.org/project/requests/)
-to be installed, use `pip install -r requirements.txt` to install.
 """
 
 import argparse
+import copy
 import datetime
 import json
 import logging
 import os
-import requests
 import sys
+from pathlib import Path
 
+import requests
+import xlsxwriter
 from dotenv import load_dotenv
+from xlsxwriter.utility import xl_col_to_name
 
-VERSION = "1.2.1"
+from helpers.utils import ensure_file_extension, obfuscate, unique_ordered_list, yn_choice
+
+
+VERSION = "1.2.2"
 BASE_URL = "https://keysafe-cloud.appspot.com/api/v1"
+API_KEY_LENGTH = 32
 
 # load environment variables from .env file
 load_dotenv()
 # =============================================================================
-# NOTE: For different (sub-)tenants: use a different API Key in each run.
-#
-#       Instead of changing this in the script, it is strongly recommended
+# NOTE: Instead of setting API Keys within scripts, it is strongly recommended
 #       to keep the TENANT_API_KEY safe / secure within a local `.env` file.
 #
 #       Make sure the `.env` is excluded from source code control, for example
-#       by using `.gitignore` to exclude the `.env` file.
+#       by using a `.gitignore` entry to exclude the `.env` file.
 #
-#       It is possible to override the `.env` value with on the command-line
+#       It is possible to override this `.env` value with on the command-line
 #       using the `--api_key` parameter.
-#
-#       For different (sub-)tenants: use a different API Key in each run.
 TENANT_API_KEY = os.environ.get("TENANT_API_KEY")
 # =============================================================================
 
-OUTPUT_FORMATS = ["csv", "json"]
-try:
-    import xlsxwriter
-    from xlsxwriter.utility import xl_col_to_name
-
-    OUTPUT_FORMATS.append("xlsx")
-except ImportError:
-    xslxwriter = None
-
-
+# mapping of known fields to initial Excel .xlsx column widths
 FIELD_WIDTHS = {
     "batch_code": 14,
-    "bootloader_modified": 25,
+    "bootloader_modified": 26,
     "bootloader_version": 8,
-    "created": 25,  # deprecated, use batch_code
-    "firmware_modified": 25,
+    "created": 26,  # deprecated, use batch_code
+    "firmware_modified": 26,
     "firmware_version": 8,
     "hardware_model": 9,
     "hardware_version": 8,
@@ -71,130 +79,69 @@ FIELD_WIDTHS = {
     "lock_version": 5,
     "lock_uid": 21,
     "mac_address": 17,
-    "modified": 25,
+    "modified": 26,
     "nr_of_slots": 5,
     "reference": 18,
-    "software_modified": 25,
+    "software_modified": 26,
     "software_version": 8,
 }
 FIELDS_ARGS_DEFAULT = "id,lock_uid,lock_status,reference"
-FIELDS_ARGS_ALL = (
+FIELDS_ARGS_VERBOSE = (
     "id,lock_uid,mac_address,lock_status,reference,lock_model,lock_version,batch_code,"
     "modified,nr_of_slots,hardware_model,hardware_version,software_version,software_modified,"
     "firmware_version,firmware_modified"
 )
 
-# configure the logging
+# configure logging
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def yn_choice(message: str, default: str = "y") -> bool:
-    """
-    Handle an interactive response to the given message/question.
-    Returns boolean True when question is confirmed via user input.
-    Based on https://stackoverflow.com/a/4741730/2315612
-    combined with https://stackoverflow.com/a/54712937/2315612
-    """
-    choices = "Y/n" if default.lower() in ("y", "yes") else "y/N"
-    try:
-        choice = input("{} ({}) ".format(message, choices))
-    except KeyboardInterrupt:
-        logger.error("Received keyboard interrupt, exit script.")
-        sys.exit(1)
-    except EOFError:
-        logger.error("Unexpected EOF, exit script.")
-        sys.exit(1)
-    values = ("y", "yes", "") if choices == "Y/n" else ("y", "yes")
-    return choice.strip().lower() in values
-
-
-def obfuscate(s: str, show: int = 6) -> str:
-    """
-    Obfuscate a string, showing only the last `show` characters.
-
-    :param s: string to obfuscate
-    :param show: number of characters to show at the end
-    :return: obfuscated string
-    """
-    return f"OBFUSCATED:{s[-show:]}" if s else "OBFUSCATED:None"
-
-
-def unique_ordered_list(items) -> list[str]:
-    """
-    Reduce items to a unique set, while maintaining order.
-
-    :param items: list of string items
-    :return: unique ordered list of items
-    """
-    if not items:
-        return []
-    seen = set()
-    result = []
-    for item in items:
-        if item not in seen:
-            result.append(item)
-            seen.add(item)
-    return result
-
-
-def ensure_file_extension(fname: str, fmt: str) -> str:
-    """
-    Ensure that the given filename ends with the specified format extension.
-
-    :param fname: original filename (e.g., "report.txt", "data.json")
-    :param fmt: target format extension (e.g., "csv", "json", "xlsx")
-    :return: corrected filename (e.g., "report.csv")
-    """
-    # normalize the format extension requested
-    target_ext = f".{fmt.lower()}"
-    # check if fname already ends with the target extension
-    if fname.strip().lower().endswith(target_ext):
-        return fname
-    # change/add extension of the fname
-    parts = fname.rsplit(".", 1)
-    base_name = parts[0]
-    return f"{base_name}{target_ext}"
 
 
 def get_locks_url(limit: int = 0) -> str:
     """
     Create query Uniform Resource Locator (URL) to obtain locks.
-    Returns a string URL to be used when making API request for locks.
+
+    :param limit: maximum number of entries in one batch when requesting list
+    :return: string URL to be used when making API request for locks
     """
     url = BASE_URL.strip().rstrip("/") + "/locks"
     if limit:
         prefix = "&" if ("?" in url) else "?"
-        url = "{0}{1}limit={2}".format(url, prefix, limit)
+        url = f"{url}{prefix}limit={limit}"
     return url
 
 
 def get_headers(api_key: str) -> dict:
     """
-    Create headers to use when making requests to the KSC API.
-    Returns a dictionary to be used as headers when making API requests.
+    Create HTTP headers to use when making requests to the KSC API.
+
+    :param api_key: the API Key to be included in the request
+    :return: dictionary to be used as headers when making API requests
     """
     tenant_api_key = api_key.strip()
-    if len(tenant_api_key) != 32:
-        logger.warning("WARNING: Unexpected length of API Key, please adjust!")
+    if len(tenant_api_key) != API_KEY_LENGTH:
+        logger.warning("Unexpected length of API Key, please adjust!")
+        sys.exit(1)
     # identify the script and the requests library used
-    script_ver = "list-tenant-locks/{}".format(VERSION)
-    requests_ver = "python-requests/{}".format(requests.__version__)
-    headers = {
+    script_ver = f"list-tenant-locks/{VERSION}"
+    requests_ver = f"python-requests/{requests.__version__}"
+    return {
         "X-Api-Key": tenant_api_key.strip(),
         "Accept-Encoding": "gzip,deflate",
         "Content-Type": "application/json",
-        "User-Agent": "{}; {}; gzip".format(script_ver, requests_ver),
+        "User-Agent": f"{script_ver}; {requests_ver}; gzip",
     }
-    return headers
 
 
 def get_locks(url: str, headers: dict) -> tuple[int, list[dict]]:
     """
-    Request all locks for tenant inventory (associated with API key in headers),
-    handling any batch processing as required via URL (see "List all locks").
-    Returns number of requests executed and a list of all locks in the tenant
-    inventory (if any).
+    Request all locks for tenant inventory (associated with API key in headers).
+
+    Handles any batch processing as required via URL (see "List all locks").
+
+    :param url: the URL to be used in the HTTP request
+    :param headers: headers to be used in HTTP request
+    :return: number of requests executed and list of all locks in tenant inventory (if any)
     """
     r_count = 0
     data = None
@@ -202,9 +149,10 @@ def get_locks(url: str, headers: dict) -> tuple[int, list[dict]]:
     while url:
         r_count += 1
         try:
-            r = requests.get(url, headers=headers, json=data)
-        except requests.exceptions.ConnectionError as e:
-            logger.error(f"Connection error: {e}")
+            logger.debug(f"HTTP Request URL: {url}")
+            r = requests.get(url, headers=headers, json=data, timeout=10)
+        except requests.exceptions.ConnectionError:
+            logger.exception("Connection error.")
             sys.exit(1)
         try:
             r_data = r.json()
@@ -216,24 +164,22 @@ def get_locks(url: str, headers: dict) -> tuple[int, list[dict]]:
                 lst.append(result)
             else:
                 lst.extend(result)
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Request exception: {e}")
-            # logger.debug(r.text)
+        except requests.exceptions.RequestException:
+            logger.exception("Request exception.")
+            if r and r.text:
+                logger.debug(r.text)
             sys.exit(1)
     return r_count, lst
 
 
-def export_xlsx(fname: str, flds: list[str], data: list[dict]):
+def export_xlsx(fname: str, flds: list[str], data: list[dict]) -> None:
     """
-    Export the result into Excel (.xlsx) format.
+    Export the result into Excel .xlsx spreadsheet format.
 
     :param fname: filename requested, already adjusted to format
     :param flds: list of fields requested
     :param data: list of records, already reduced to fields requested
     """
-    if not xlsxwriter:
-        logger.warning("Warning: XLSX format requested, but xlsxwriter not available.")
-        return
     try:
         logger.debug("Create a workbook and add 3 worksheets.")
         wb = xlsxwriter.Workbook(fname)
@@ -249,28 +195,24 @@ def export_xlsx(fname: str, flds: list[str], data: list[dict]):
             ws.set_column(col_nr, col_nr, col_width)
         logger.debug("Prepare headers and data for the table.")
         col_headers = [{"header": fld} for fld in flds]
-        data_rows = []
-        for rec in data:
-            data_rows.append([f"{rec.get(fld, '')}" for fld in flds])
+        data_rows = [[f"{rec.get(fld, '')}" for fld in flds] for rec in data]
         # sort lexicographically by comparing corresponding elements from left to right
         data_rows = sorted(data_rows)
         logger.debug("Add table with data to the worksheet.")
-        rng_column = xl_col_to_name(len(flds) - 1)
-        rng_rows = len(data_rows) + 1
-        xl_range = f"$A$1:${rng_column}${rng_rows}"
-        logger.debug(xl_range)
+        rng_col = xl_col_to_name(len(flds) - 1)
+        rng_row = len(data_rows) + 1
+        xl_range = f"$A$1:${rng_col}${rng_row}"
         ws.add_table(xl_range, {"data": data_rows, "columns": col_headers})
         logger.debug("Add defined name for the data table.")
-        ws_xl_range = f"={ws.name}!{xl_range}"
-        wb.define_name("AllData", ws_xl_range)
+        wb.define_name("AllData", f"={ws.name}!{xl_range}")
         logger.debug("Close the workbook and save the file.")
         wb.close()
         logger.info(f"Successfully created XLSX file: {fname}")
-    except Exception as e:
-        logger.error(f"Error writing XLSX file: {e}")
+    except Exception:
+        logger.exception("Error writing XLSX file.")
 
 
-def provide_output(fname: str, fmt: str, flds: list[str], data: list[dict]) -> str:
+def export_data(fname: str, fmt: str, flds: list[str], data: list[dict]) -> str:
     """
     Provide output of data in the format requested, also written to fname output file if specified.
 
@@ -283,21 +225,21 @@ def provide_output(fname: str, fmt: str, flds: list[str], data: list[dict]) -> s
     result = ""
     if fmt in ["csv", "json"]:
         if fmt == "csv":
-            logger.info("Convert result into CSV format...")
+            logger.info("Converting result into CSV format...")
             # provide names of fields as header on first line
-            lines = [";".join(['"{}"'.format(fld) for fld in flds])]
+            lines = [";".join([f'"{fld}"' for fld in flds])]
             for rec in data:
                 # for each record provide field values on one line
-                line = ";".join(['"{}"'.format(rec[fld]) for fld in flds])
+                line = ";".join([f'"{rec[fld]}"' for fld in flds])
                 lines.append(line)
             # combine all lines with record details into CSV result
             result = "\n".join(lines)
         if fmt == "json":
-            logger.info("Convert result into JSON format...")
+            logger.info("Converting result into JSON format...")
             result = json.dumps(data, indent=2, sort_keys=True)
         if fname:
-            logger.info("Export/output result to: {}".format(fname))
-            with open(fname, "w") as out_file:
+            logger.info(f"Export/output result to: {fname}")
+            with Path(fname).open("w") as out_file:
                 out_file.write(result)
     if fmt == "xlsx":
         export_xlsx(fname=fname, flds=flds, data=data)
@@ -305,12 +247,36 @@ def provide_output(fname: str, fmt: str, flds: list[str], data: list[dict]) -> s
     return result
 
 
+def reduce_data(data: list[dict], flds: list[str]) -> tuple[list[dict], list[str]]:
+    """
+    Reduce given input data, filtering records to specified list of fields.
+
+    :param data: input data as list of dict records
+    :param flds: list of fields to keep in the return data
+    :return: list of records reduced to list of fields, and effective list of fields
+    """
+    if not flds:
+        # special case, first build flds from data itself;
+        # to include all fields of all records in order encountered
+        flds = []
+        for rec in data:
+            new_flds = [fld for fld in unique_ordered_list(list(rec.keys())) if fld not in flds]
+            flds.extend(new_flds)
+    # make a copy of the input data
+    result = copy.deepcopy(data)
+    for rec in result:
+        # get hold of list of unique fields in the record
+        rec_flds = set(rec.keys())
+        for rec_fld in rec_flds:
+            if rec_fld not in flds:
+                del rec[rec_fld]
+    return result, flds
+
+
 if __name__ == "__main__":
-    dt_now = datetime.datetime.now(datetime.timezone.utc)
+    dt_now = datetime.datetime.now()
     # configure command-line parsing
-    parser = argparse.ArgumentParser(
-        description="List all locks in the tenant inventory."
-    )
+    parser = argparse.ArgumentParser(description="List all locks in the tenant inventory.")
     parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")
     parser.add_argument(
         "--api_key",
@@ -332,7 +298,7 @@ if __name__ == "__main__":
         default=FIELDS_ARGS_DEFAULT,
         help="determine the fields to include in the output "
         '(default "id,lock_uid,lock_status,reference" provides a quick overview; '
-        'use "all" for all fields)',
+        'use "-" for a verbose set of fields, use "" for all fields)',
     )
     parser.add_argument(
         "--format",
@@ -340,15 +306,16 @@ if __name__ == "__main__":
         choices=["csv", "json", "xlsx"],
         default="json",
         help='provide result in specified format (default "json" for JSON output; '
-        'use "csv" for CSV output, and "xlsx" for XLSX spreadsheet output)',
+        'use "csv" for CSV output, and "xlsx" for Excel spreadsheet output)',
     )
     parser.add_argument(
         "--out",
         type=str,
-        default=f"list-locks-{dt_now:%Y-%m-%d}.json",
-        help='write result to specified filename (default "list-locks-YYYY-MM-DD")',
+        default=f"list-locks-{dt_now:%Y-%m-%d-%H%M}.json",
+        help='write result to specified filename (default "list-locks-YYYY-mm-dd-HHMM" '
+        "with format extension)",
     )
-    parser.add_argument("--show", action="store_true", help="show result")
+    parser.add_argument("--show", action="store_true", help="show data obtained")
 
     # parse command-line arguments
     args = parser.parse_args()
@@ -356,71 +323,62 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
 
     # determine fields to be extracted
-    if args.fields.strip() in ["*", "all"]:
-        args.fields = FIELDS_ARGS_ALL
+    if args.fields.strip() in ["-"]:
+        args.fields = FIELDS_ARGS_VERBOSE
     # reduce fields to a unique set, while maintaining order
-    flds = unique_ordered_list(args.fields.lower().split(","))
-    logger.debug(f"Requested fields: {flds}")
+    flds = unique_ordered_list(list(args.fields.lower().split(",")))
+    if args.fields.strip() in ["*", ""]:
+        flds = []
+        logger.debug("Requested fields: all")
+    else:
+        logger.debug(f"Requested fields: {flds}")
 
     # determine output format
-    if (args.format in ["xlsx"]) and (not xlsxwriter):
-        # library required when XLSX requested
-        logger.error(
-            'ERROR: format "xlsx" requested without Python xlsxwriter installed.'
-        )
-        sys.exit(1)
-    logger.debug(f"Requested format: {args.format}")
+    fmt = args.format
+    logger.debug(f"Requested format: {fmt}")
 
     # determine output filename to be used, taking format into account
-    fname_out = ""
+    fname = ""
     if args.out:
-        fname_out = ensure_file_extension(args.out, args.format)
-        logger.debug(f"Requested output file: {fname_out}")
+        fname = ensure_file_extension(args.out, args.format)
+    if fname:
+        logger.debug(f'Requested output file: "{fname}"')
     else:
-        logger.debug("No output file requested.")
+        logger.info("No output file specified.")
 
     # prepare API calls
-    logger.info("Determine URL to be used for query.")
+    logger.info("Determine initial URL to be used for query.")
     url = get_locks_url(args.limit or 0)
-    logger.debug(f"HTTP Request URL: {url}")
     logger.info("Determine headers to be used for all requests.")
     if args.api_key:
-        logger.debug("Using the API Key: {}".format(obfuscate(args.api_key)))
+        logger.debug(f"Using the API Key: {obfuscate(args.api_key)}")
     else:
-        logger.error(
-            "ERROR: No TENANT_API_KEY set in .env file or provided via arguments!"
-        )
+        logger.error("No TENANT_API_KEY set in .env file or provided via arguments!")
         sys.exit(1)
     headers = get_headers(args.api_key)
-    _headers = dict(headers)
+    _headers = copy.copy(headers)
     if _headers:
         # protect the TENANT_API_KEY by obfuscating it in the logs
         _headers["X-Api-Key"] = obfuscate(args.api_key)
         logger.debug(f"HTTP Request Headers: {_headers}")
 
     # obtain tenant inventory using "List all locks"
+    logger.info("-" * 60)
     logger.info("Get all locks for tenant based on API Key...")
     r_count_lst, all_locks = get_locks(url, headers)
-    logger.info("# of all locks in tenant inventory: {}".format(len(all_locks)))
-    logger.info("Obtained with {} non-eKey API requests.".format(r_count_lst))
+    logger.info(f"# of all locks in tenant inventory: {len(all_locks)}")
+    logger.info(f"Obtained with {r_count_lst} non-eKey API requests.")
+    logger.info("-" * 60)
     logger.debug(all_locks)
 
-    # reduce result (in all_locks list) to requested fields
-    for rec in all_locks:
-        # get hold of list of unique fields in the record
-        _rec_flds = set(rec.keys())
-        for rec_fld in _rec_flds:
-            if rec_fld not in flds:
-                del rec[rec_fld]
+    # reduce the data (in all_locks list) to the requested fields
+    data, flds = reduce_data(data=all_locks, flds=flds)
+    # export the data
+    if fname:
+        export_data(fname=fname, fmt=fmt, flds=flds, data=data)
 
-    # provide the result output, for XLSX expected to file only
-    result = provide_output(fname=fname_out, fmt=args.format, flds=flds, data=all_locks)
-
-    # either use command-line parameter set to show, or ask user
-    if args.out:
-        show = args.show
-    else:
-        show = args.show or yn_choice("Show result?", default="n")
-    if show:
-        logger.info("Result:")
-        logger.info(result)
+    # when requested, show the data; or ask user first
+    if not args.show and not fname:
+        args.show = yn_choice("Show data?", default="n")
+    if args.show:
+        logger.info(json.dumps(data, indent=2, sort_keys=True))
