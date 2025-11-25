@@ -41,7 +41,12 @@ import xlsxwriter
 from dotenv import load_dotenv
 from xlsxwriter.utility import xl_col_to_name
 
-from helpers.utils import ensure_file_extension, obfuscate, unique_ordered_list, yn_choice
+from helpers.utils import (
+    ensure_file_extension,
+    obfuscate,
+    unique_ordered_list,
+    yn_choice,
+)
 
 
 VERSION = "1.2.2"
