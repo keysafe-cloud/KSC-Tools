@@ -1,0 +1,365 @@
+{
+  "name": "KSC Usage API",
+  "version": "1",
+  "items": [
+    {
+      "type": "http",
+      "name": "Claim a lock",
+      "filename": "Claim a lock.bru",
+      "seq": 4,
+      "settings": {
+        "encodeUrl": true,
+        "timeout": 0
+      },
+      "tags": [],
+      "examples": [],
+      "request": {
+        "url": "{{base_url}}/api/v1/locks",
+        "method": "POST",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"claim_code\": \"{{claim_code}}\",\n  \"lock_uid\": \"{{lock_uid}}\",\n  \"reference\": \"{{reference}}\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {
+          "req": [
+            {
+              "name": "lock_uid",
+              "value": "deadbeef0000deadbeef",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "claim_code",
+              "value": "deadbeef00deadbeef01deadbeef0203",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "reference",
+              "value": "Test",
+              "enabled": true,
+              "local": false
+            }
+          ]
+        },
+        "assertions": [],
+        "tests": "",
+        "docs": "# Claim a lock\n\nDemonstrates how to claim a lock into your tenant inventory (as specified by the API Access Key used). It requires information from the QR/DM code printed on the lock label: in \"AXA-*<lock\\_uid>*-*<claim\\_code>*\" format.\n\nThe target inventory is determined by the API Key provided, as it associates you with the Tenant organization.\n\nWhen claiming a lock for the first time (received from the manufacturer or another tenant): the lock will need to have the *“transferable”* status when claimed, which is the default when delivered from the manufacturer. If so, the lock will be successfully claimed and put in your inventory; it will also automatically receive the *“active”* status.\n\nWhen transferring between tenants, the transferring (or selling) tenant is responsible for providing the accompanying claim_code and ensuring that the lock has the *“transferable”* status.\n\n## Usage\n\nSee the *\"Use of the KSC API Access Key\"* section on the *\"Overview\"* / *\"Documentation\"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.\n\n### Use of Variables\n\nUpdate the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).\n\n### Examples\n\n**Example 1** - Claim a lock with an example *\"Test\"* reference:\n\n```\nlock_uid=deadbeef0000deadbeef\nclaim_code=deadbeef00deadbeef01deadbeef0203\nreference=Test\n```\n\nUsing this (artificial) *lock\\_uid* and *claim\\_code* on the *Vars* tab will try to claim the artificial lock. Which actually doesn't exist, and thus the **404** *\"Not Found\"* result is expected.\n\nScan the QR/DM-code on the label of a lock to get the \"AXA-*<lock\\_uid>*-*<claim\\_code>*\" to use for claiming that lock.\n\nNote that when a lock is claimed into a specific tenant inventory, it cannot be claimed by/into another tenant unless the lock is specifically set to *\"transferable\"* first (via the *\"Set lock status\"* request). Claiming an already claimed lock into the same tenant inventory will work (changing the *reference* when specified in the request).\n",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "List all locks",
+      "filename": "List all locks.bru",
+      "seq": 1,
+      "settings": {
+        "encodeUrl": true,
+        "timeout": 0
+      },
+      "tags": [],
+      "examples": [],
+      "request": {
+        "url": "{{base_url}}/api/v1/locks",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "# List all locks\n\nList all Lock resources in your inventory. The tenant inventory is determined by the KSC API Access Key (aka API Key) used.\n\n## Usage\n\nSee the *\"Use of the KSC API Access Key\"* section on the *\"Overview\"* / *\"Documentation\"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.\n\n### Use of Variables\n\nUpdate the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).\n\n### Examples\n\nOn this request as-is, there are no variables; the request will try to obtain all the locks in the tenant inventory. The tenant inventory is determined by the API Key used. So when you have a development/test tenant and a production tenant, then you have to change the API Key (in the `env` file) to list locks in the different tenant inventories.\n\nFor new tenants, the response/result to this request will likely show an empty list of locks. Adding a lock to the tenant inventory can be done with the *\"Claim a lock\"* request.\n",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "List specific lock(s)",
+      "filename": "List specific lock(s).bru",
+      "seq": 2,
+      "settings": {
+        "encodeUrl": true,
+        "timeout": 0
+      },
+      "tags": [],
+      "examples": [],
+      "request": {
+        "url": "{{base_url}}/api/v1/locks?lock_uids={{lock_uids}}",
+        "method": "GET",
+        "headers": [],
+        "params": [
+          {
+            "name": "lock_uids",
+            "value": "{{lock_uids}}",
+            "type": "query",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {
+          "req": [
+            {
+              "name": "lock_uids",
+              "value": "DeadBeef0000deadBEEF",
+              "enabled": true,
+              "local": false
+            }
+          ]
+        },
+        "assertions": [],
+        "tests": "",
+        "docs": "# List specific lock(s)\n\nList specific Lock resources in your inventory, filtered to the **lock\\_uids** query parameter. The tenant inventory is determined by the KSC API Access Key (aka API Key) used.\n\n## Usage\n\nSee the *\"Use of the KSC API Access Key\"* section on the *\"Overview\"* / *\"Documentation\"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.\n\n### Use of Variables\n\nUpdate the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).\n\n### Examples\n\nIn the following examples, with artificial Lock UID(s), the response will likely return an empty list. Adjust to values known to work in your inventory. The Lock UID is printed on the lock label, with \"-\" dashes for readability; the dashes shouldn't be used here.\n\n**Example 1** - Searching for details on just one Lock UID, showing that the capitalization of the hexadecimal *lock\\_uid* value is ignored: \n\n```\nlock_uids=DeadBeef0000deadBEEF\n```\n\n**Example 2** - Trying to list 2 Lock UIDs, will try to select locks with these specific Lock UID values (multiple, as there is a comma-separator):\n\n```\nlock_uids=deadbeef0000deadbeef,00deadbeef00deadbeef\n```\n",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Obtain an eKey",
+      "filename": "Obtain an eKey.bru",
+      "seq": 5,
+      "settings": {
+        "encodeUrl": true,
+        "timeout": 0
+      },
+      "tags": [],
+      "examples": [],
+      "request": {
+        "url": "{{base_url}}/api/v1/locks/{{lock_id}}/slots/{{position}}?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys",
+        "method": "PUT",
+        "headers": [],
+        "params": [
+          {
+            "name": "opt_fields",
+            "value": "hours,lock_id,lock_uid,nr_of_passkeys",
+            "type": "query",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"hours\": {{hours}},\n  \"nr_of_passkeys\": {{nr_of_passkeys}},\n  \"passkey_type\": \"otp\",\n  \"segmented\": true,\n  \"tag\": \"{{tag}}\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {
+          "req": [
+            {
+              "name": "lock_id",
+              "value": "0102030405060708",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "position",
+              "value": "1",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "hours",
+              "value": "24",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "nr_of_passkeys",
+              "value": "32",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "tag",
+              "value": "Order #2025-678",
+              "enabled": true,
+              "local": false
+            }
+          ]
+        },
+        "assertions": [],
+        "tests": "",
+        "docs": "# Obtain an eKey\n\nObtain an *eKey* for a given *slot position* of a *lock* resource in your inventory.\n\nNote that it is strongly recommended to use the *?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys* query parameter, as it will enhance the response by adding these fields into the result. Thus making it clear what the eKey+OTPs represent.\n\nIt is also recommended for most implementation to use the eKey+OTPs approach (with *passkey_type=otp*), in which short OTPs can be send to the physical lock to initiate an open or close action. For an eKey+OTPs, the *passkey* field in the response result is a dash *\"-\"* separated list of *nr\\_of\\_passkeys* OTPs.\n\n## Usage\n\nSee the *\"Use of the KSC API Access Key\"* section on the *\"Overview\"* / *\"Documentation\"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.\n\n### Use of Variables\n\nUpdate the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).\n\n### Examples\n\n**Example 1** - Obtain an eKey with 32 OTPs for a 24-hour rental agreement (on position 1):\n\n```\nlock_id=0102030405060708\nposition=1\n\nhours=24\nnr_of_passkeys=32\ntag=Order #2025-678\n```\n\nThe top *lock\\_id* and *position* variables in this example will be used in the request URL, while the other 3 variables (*hours*, *nr\\_of\\_passkeys*, and *tag*) will be set in the request body. Note on the *Body* tab that the *passkey\\_type* and *segmented* fields are predefined in the request body JSON; they can be changed, but it is recommended to use only the eKey+OTPs approach for typical implementations.\n\n**Example 2** - Obtain an eKey with 16 OTPs for 8 hours on position 0 (to be used by a mechanic, servicing the bike/lock):\n\n```\nlock_id=0102030405060708\nposition=0\n\nhours=8\nnr_of_passkeys=16\ntag=Service ticket REPAIR-074\n```\n\nWhile examples, this shows how a mechanic could be provided a special eKey on *position=0* that could be used while the end-user in a rental agreement could use a normal eKey on *position=1* for the same bike/lock. This allows the mechanic to service the bike while the end-user is, for example, in a museum or a hotel. When serviced (and relocked by the mechanic), the end-user could continue under the existing rental agreement (using the eKey+OTPs on *position=1* already on the end-user device).\n\n**Example 3** - Obtain a special eKey with -1 hours to invalidate prior eKeys:\n\n```\nlock_id=0102030405060708\nposition=1\n\nhours=-1\nnr_of_passkeys=1\ntag=Invalidate prior eKeys\n```\n\nRequesting an eKey with **hours=-1** hours is a special case. To obtain an eKey that, when loaded into the physical lock, invalidates all previous ones (all eKeys with a lower *sequence*), without a new agreement starting (on this *slot\\_position*).\n",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Retrieve lock details",
+      "filename": "Retrieve lock details.bru",
+      "seq": 3,
+      "settings": {
+        "encodeUrl": true,
+        "timeout": 0
+      },
+      "tags": [],
+      "examples": [],
+      "request": {
+        "url": "{{base_url}}/api/v1/locks/{{lock_id}}",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {
+          "req": [
+            {
+              "name": "lock_id",
+              "value": "0102030405060708",
+              "enabled": true,
+              "local": false
+            }
+          ]
+        },
+        "assertions": [],
+        "tests": "",
+        "docs": "# Retrieve lock details\n\nRetrieves the details of the Lock resource, using the *lock\\_id* of that lock.\n\nRetrieving lock details for a specific lock is limited to locks in your tenant inventory. The tenant inventory is determined by the KSC API Access Key (aka API Key) used.\n\n## Usage\n\nSee the *\"Use of the KSC API Access Key\"* section on the *\"Overview\"* / *\"Documentation\"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.\n\nUse the *\"List specific lock(s)\"* request with a known Lock UID to find the *lock\\_id* for locks in your tenant inventory. Adding a lock to the tenant inventory can be done with the *\"Claim a lock\"* request; this will also return the *lock\\_id* in the response.\n\n### Use of Variables\n\nUpdate the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).\n\n### Examples\n\n**Example 1** - Retrieve lock details for a specific lock:\n\n```\nlock_id=0102030405060708\n```\n\nUsing this (artificial) *lock\\_id* on the *Vars* tab will attempt to retrieve details for a specific lock, which is unlikely to be in your inventory (as determined via the API Key used). Thus, the **404** *\"Not Found\"* result is expected, and the description will help you interpret the error response.\n",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Set lock status",
+      "filename": "Set lock status.bru",
+      "seq": 6,
+      "settings": {
+        "encodeUrl": true,
+        "timeout": 0
+      },
+      "tags": [],
+      "examples": [],
+      "request": {
+        "url": "{{base_url}}/api/v1/locks/{{lock_id}}/status",
+        "method": "PUT",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"lock_status\": \"{{new_status}}\",\n  \"reference\": \"{{reference}}\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": [],
+          "file": []
+        },
+        "script": {},
+        "vars": {
+          "req": [
+            {
+              "name": "lock_id",
+              "value": "0102030405060708",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "new_status",
+              "value": "defect",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "reference",
+              "value": "Bike repair planned",
+              "enabled": true,
+              "local": false
+            }
+          ]
+        },
+        "assertions": [],
+        "tests": "",
+        "docs": "# Set lock status\n\nSet the *lock\\_status* (and optionally the *reference*) of a given lock resource in your inventory. Consult the Pricing documentation for all states and their impacts/limitations.\n\n## Usage\n\nSee the *\"Use of the KSC API Access Key\"* section on the *\"Overview\"* / *\"Documentation\"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.\n\n### Use of Variables\n\nUpdate the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).\n\n### Examples\n\n**Example 1** - Set lock status to *defect* to avoid eKeys being requested, for example, when the bike will not be rented out until the bike is repaired:\n\n```\nlock_id=0102030405060708\n\nnew_status=defect\nreference=Bike repair planned\n```\n\nThe top *lock\\_id* in this example will be used in the request URL, while the other 2 variables (*new\\_status* and *reference*) will be set in the request body.\n\nRequesting eKeys for *defect*, *lost*, or *stolen* locks is not possible. To request an eKey for inactive locks, you will need to set the KSC lock status to *active* again. This is shown in the second example below.\n\n**Example 2** - Set lock status back to *active* when the bike/lock can be used again:\n\n```\nlock_id=0102030405060708\n\nnew_status=active\nreference=\n```\n\nUsing an empty *reference* (effectively a \"\" string in the JSON body of the request) will clear any prior *reference*; as can be seen in the response result.\n\n**Example 3** - Set lock status to *stored* when the bike/lock will not be used for a long time, like in off-season months:\n\n```\nlock_id=0102030405060708\n\nnew_status=stored\nreference=\n```\n\nNote that requesting eKeys for *stored* locks is possible, and the lock will be set to *active* automatically. allowing the eKey to be obtained without delay (see the *\"Obtain an eKey\"* request).\n",
+        "auth": {
+          "mode": "inherit"
+        }
+      }
+    }
+  ],
+  "environments": [],
+  "root": {
+    "request": {
+      "auth": {
+        "mode": "apikey",
+        "apikey": {
+          "key": "X-API-Key",
+          "value": "{{API_KEY}}",
+          "placement": "header"
+        }
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "enabled": true,
+          "uid": "9cYXrqMZqCguxUnyCEMGb"
+        }
+      ],
+      "script": {
+        "req": "// To keep your KSC API Access Key secret, set it in your (new) `.env` file.\n// The `.env.example` file provides a template for your `.env` to copy and adjust.\n// --------------------------------------------------------------------------------\n// By default, it is then loaded in the API_KEY collection variable (see Vars tab).\n// Though an override for API_KEY can be set in an active Bruno environment (with\n// precedence, highest to lowests: Runtime>Request>Folder>Environment>Collection).\n// --------------------------------------------------------------------------------\nif (true) {\n  // Detect cases in which the API_KEY is not set correctly\n  const api_key = bru.getEnvVar(\"API_KEY\") ?? bru.getCollectionVar(\"API_KEY\");\n  expect(api_key, \"'Couldn\\'t obtain API_KEY as a variable from .env file.'\").to.not.equal(undefined);\n  const api_key_spec = \"{{process.env.KSC_API_KEY}}\";\n  expect(api_key.slice(0, 14), \"'Couldn\\'t obtain API_KEY as a variable from .env file.'\").to.not.equal(api_key_spec.slice(0, 14));\n}\n"
+      },
+      "vars": {
+        "req": [
+          {
+            "name": "base_url",
+            "value": "https://keysafe-cloud.appspot.com",
+            "enabled": true,
+            "local": false,
+            "uid": "p4JCRu4N5qfHolaS3HjXf"
+          },
+          {
+            "name": "API_KEY",
+            "value": "{{process.env.KSC_API_KEY}}",
+            "enabled": true,
+            "local": false,
+            "uid": "yuaJS5G9Y62j9TBut4QAP"
+          }
+        ]
+      }
+    },
+    "docs": "Bruno collection for exploring the **KeySafe-Cloud (KSC)** Application Programming Interface (API).\n\nPlease consult the full KSC API documentation for more details, as this *\"KSC Usage API collection for Bruno\"* (version 1.2.2 dated 2025-11-26) only explores a subset of the KSC API to get started.\n\n## Usage\n\nThe *\"Use of the KSC API Access Key\"* section below provides details on how to use a (new) `.env` file to set the KSC API Access Key for a specific tenant inventory.\n\n### Use of the KSC API Access Key\n\n* Copy the `.env.example` file to a file named `.env`\n* Edit the `.env` file and set **KSC_API_KEY=**_*SECRET*_ to your KSC API Access Key\n* In this Bruno collection, the **KSC_API_KEY** will be loaded into the collection level **API_KEY** variable and in turn, this is used to set the **X-API-Key** header as the **Auth** method (see *Vars* and *Auth* tabs of the collection)\n* When set correctly, the *Pre-Request* script on the collection *Script* tab will pass the `expect` clause and your tests will run with your KSC API Access Key provided via the **X-API-Key** header to the KeySafe-Cloud (KSC) services.\n* See the https://docs.usebruno.com/secrets-management/overview link for more details about this `.env` file (aka DotEnv) approach.\n",
+    "meta": {
+      "name": "KSC Usage API"
+    }
+  },
+  "brunoConfig": {
+    "version": "1",
+    "name": "KSC Usage API",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ],
+    "size": 0.015151023864746094,
+    "filesCount": 7
+  }
+}
