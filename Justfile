@@ -2,6 +2,10 @@
 # in this case `bash` supports `source` (used in `dbg` target)
 set shell := ["bash", "-c"]
 
+# loading environment variables from `.env` file
+# (to keep API Key details out of source code control)
+set dotenv-load := true
+
 # install, lint, build, and test the application
 default: install lint
 
@@ -33,6 +37,7 @@ lint:
     uv run ruff check .
     uv run ty check .
 
-# run docker and shell
+# run docker and start interactive shell
 sh:
-    docker run --rm -it -e KSC_API_KEY=SECRET ksc/tools sh
+    # pass on the environment variable, as loaded from .env file
+    docker run --rm -it -e KSC_API_KEY=$KSC_API_KEY ksc/tools sh
