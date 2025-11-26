@@ -212,9 +212,9 @@ def export_xlsx(fname: str, flds: list[str], data: list[dict]) -> None:
         wb.define_name("AllData", f"={ws.name}!{xl_range}")
         logger.debug("Close the workbook and save the file.")
         wb.close()
-        logger.info(f"Successfully created XLSX file: {fname}")
+        logger.info(f"Successfully created Excel spreadsheet file: {fname}")
     except Exception:
-        logger.exception("Error writing XLSX file.")
+        logger.exception("Error writing Excel .xlsx file.")
 
 
 def export_data(fname: str, fmt: str, flds: list[str], data: list[dict]) -> str:
@@ -225,7 +225,7 @@ def export_data(fname: str, fmt: str, flds: list[str], data: list[dict]) -> str:
     :param fmt: format requested (one of "csv", "json", or "xlsx")
     :param flds: list of fields requested
     :param data: list of records, already reduced to fields requested
-    :return: string result (for XLSX just file written or not)
+    :return: string result, either data (for "csv" and "json") or a message (for "xlsx")
     """
     result = ""
     if fmt in ["csv", "json"]:
@@ -248,7 +248,7 @@ def export_data(fname: str, fmt: str, flds: list[str], data: list[dict]) -> str:
                 out_file.write(result)
     if fmt == "xlsx":
         export_xlsx(fname=fname, flds=flds, data=data)
-        result = f'Open the "{fname}" for the XLSX output.'
+        result = f'Open the "{fname}" for the Excel spreadsheet output.'
     return result
 
 
