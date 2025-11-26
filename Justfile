@@ -9,10 +9,6 @@ set dotenv-load := true
 # install, lint, build, and test the application
 default: install lint
 
-# build the docker image
-build:
-    docker build -t ksc/tools .
-
 # remove all artifacts
 clean-all:
     # remove all __pycache__ folders
@@ -27,6 +23,15 @@ clean-all:
     # remove the virtual environment
     rm -rf .venv/
 
+# build the docker image for command-line
+cli-build:
+    docker build -t ksc/tools .
+
+# run the docker image for command-line with interactive shell
+cli-run:
+    # pass on the environment variable, as loaded from .env file
+    docker run --rm -it -e KSC_API_KEY=$KSC_API_KEY ksc/tools sh
+
 # install dependencies
 install:
     uv lock --upgrade
@@ -37,8 +42,3 @@ lint:
     uv run ruff format .
     uv run ruff check .
     uv run ty check .
-
-# run docker and start interactive shell
-sh:
-    # pass on the environment variable, as loaded from .env file
-    docker run --rm -it -e KSC_API_KEY=$KSC_API_KEY ksc/tools sh
