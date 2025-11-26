@@ -5,6 +5,10 @@ set shell := ["bash", "-c"]
 # install, lint, build, and test the application
 default: install lint
 
+# build the docker image
+build:
+    docker build -t ksc/tools .
+
 # remove all artifacts
 clean-all:
     # remove all __pycache__ folders
@@ -28,3 +32,7 @@ lint:
     uv run ruff format .
     uv run ruff check .
     uv run ty check .
+
+# run docker and shell
+sh:
+    docker run --rm -it -e KSC_API_KEY=SECRET ksc/tools sh

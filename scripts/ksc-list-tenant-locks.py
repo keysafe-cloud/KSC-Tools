@@ -57,14 +57,14 @@ API_KEY_LENGTH = 32
 load_dotenv()
 # =============================================================================
 # NOTE: Instead of setting API Keys within scripts, it is strongly recommended
-#       to keep the TENANT_API_KEY safe / secure within a local `.env` file.
+#       to keep the KSC_API_KEY safe / secure within a local `.env` file.
 #
 #       Make sure the `.env` is excluded from source code control, for example
 #       by using a `.gitignore` entry to exclude the `.env` file.
 #
 #       It is possible to override this `.env` value with on the command-line
 #       using the `--api_key` parameter.
-TENANT_API_KEY = os.environ.get("TENANT_API_KEY")
+KSC_API_KEY = os.environ.get("KSC_API_KEY")
 # =============================================================================
 
 # mapping of known fields to initial Excel .xlsx column widths
@@ -285,9 +285,9 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")
     parser.add_argument(
         "--api_key",
-        default=TENANT_API_KEY,
+        default=KSC_API_KEY,
         help="API Key for the tenant inventory "
-        "(default: TENANT_API_KEY constant as specified in .env file)",
+        "(default: KSC_API_KEY from environment variable or specified in .env file)",
     )
     parser.add_argument(
         "--limit",
@@ -358,12 +358,12 @@ if __name__ == "__main__":
     if args.api_key:
         logger.debug(f"Using the API Key: {obfuscate(args.api_key)}")
     else:
-        logger.error("No TENANT_API_KEY set in .env file or provided via arguments!")
+        logger.error("No KSC_API_KEY set in environment, .env file, or provided via arguments!")
         sys.exit(1)
     headers = get_headers(args.api_key)
     _headers = headers.copy()
     if _headers:
-        # protect the TENANT_API_KEY by obfuscating it in the logs
+        # protect the API Key by obfuscating it in the logs
         _headers["X-Api-Key"] = obfuscate(args.api_key)
         logger.debug(f"HTTP Request Headers: {_headers}")
 

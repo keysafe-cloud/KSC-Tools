@@ -9,12 +9,12 @@ It gets all locks of the tenant based on the KSC API Access Key provided,
 filters this list for locks that have the 'active' lock status; then asks
 the user for approval, before setting their lock status to 'stored'.
 
-NOTE: It is recommended to provide the KSC API Access Key via command-line
-      parameters (rather than changing 'SECRET' in a copy of this script).
-      Please protect your API Key as described in the API documentation.
+Use `pip install -r requirements.txt` to install `python-dotenv` and `requests` packages.
+Then use `python ksc-set-locks-stored.py --help` for usage instructions.
 
-This script requires `requests` (see https://pypi.org/project/requests/)
-to be installed, use `pip install -r requirements.txt` to install.
+NOTE: It is recommended to set the KSC API Access Key (aka API Key) in a `.env` file or via
+      command-line arguments; rather than hard-coding any 'SECRET' in a copy of this script.
+      Please protect your API Key as described in the API documentation.
 """
 
 import argparse
@@ -38,14 +38,14 @@ API_KEY_LENGTH = 32
 load_dotenv()
 # =============================================================================
 # NOTE: Instead of setting API Keys within scripts, it is strongly recommended
-#       to keep the TENANT_API_KEY safe / secure within a local `.env` file.
+#       to keep the KSC_API_KEY safe / secure within a local `.env` file.
 #
 #       Make sure the `.env` is excluded from source code control, for example
 #       by using a `.gitignore` entry to exclude the `.env` file.
 #
 #       It is possible to override this `.env` value with on the command-line
 #       using the `--api_key` parameter.
-TENANT_API_KEY = os.environ.get("TENANT_API_KEY")
+KSC_API_KEY = os.environ.get("KSC_API_KEY")
 # =============================================================================
 
 # configure logging
@@ -202,9 +202,9 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")
     parser.add_argument(
         "--api_key",
-        default=TENANT_API_KEY,
+        default=KSC_API_KEY,
         help="API Key for the tenant inventory "
-        "(default: TENANT_API_KEY constant as specified in .env file)",
+        "(default: KSC_API_KEY from environment variable or specified in .env file)",
     )
     parser.add_argument(
         "--limit",
@@ -232,12 +232,12 @@ if __name__ == "__main__":
     if args.api_key:
         logger.debug(f"Using the API Key: {obfuscate(args.api_key)}")
     else:
-        logger.error("No TENANT_API_KEY set in .env file or provided via arguments!")
+        logger.error("No KSC_API_KEY set in environment, .env file, or provided via arguments!")
         sys.exit(1)
     headers = get_headers(args.api_key)
     _headers = headers.copy()
     if _headers:
-        # protect the TENANT_API_KEY by obfuscating it in the logs
+        # protect the API Key by obfuscating it in the logs
         _headers["X-Api-Key"] = obfuscate(args.api_key)
         logger.debug(f"HTTP Request Headers: {_headers}")
 
