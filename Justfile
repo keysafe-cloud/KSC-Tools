@@ -17,12 +17,13 @@ build:
 clean-all:
     # remove all __pycache__ folders
     find . -type d -name "__pycache__" -exec rm -r {} +
+    # remove all .ruff_cache folders
+    find . -type d -name ".ruff_cache" -exec rm -r {} +
     # remove all .pyc and .pyo files
     find . -type f -name "*.pyc" -exec rm -f {} +
     find . -type f -name "*.pyo" -exec rm -f {} +
     # remove specific caches
     rm -rf .pytest_cache/
-    rm -rf .ruff_cache/
     # remove the virtual environment
     rm -rf .venv/
 
