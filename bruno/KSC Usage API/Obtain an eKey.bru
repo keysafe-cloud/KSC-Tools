@@ -1,0 +1,98 @@
+meta {
+  name: Obtain an eKey
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{base_url}}/api/v1/locks/{{lock_id}}/slots/{{position}}?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys
+  body: json
+  auth: inherit
+}
+
+params:query {
+  opt_fields: hours,lock_id,lock_uid,nr_of_passkeys
+}
+
+body:json {
+  {
+    "hours": {{hours}},
+    "nr_of_passkeys": {{nr_of_passkeys}},
+    "passkey_type": "otp",
+    "segmented": true,
+    "tag": "{{tag}}"
+  }
+}
+
+vars:pre-request {
+  lock_id: 0102030405060708
+  position: 1
+  hours: 24
+  nr_of_passkeys: 32
+  tag: Order #2025-678
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  # Obtain an eKey
+  
+  Obtain an *eKey* for a given *slot position* of a *lock* resource in your inventory.
+  
+  Note that it is strongly recommended to use the *?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys* query parameter, as it will enhance the response by adding these fields into the result. Thus making it clear what the eKey+OTPs represent.
+  
+  It is also recommended for most implementation to use the eKey+OTPs approach (with *passkey_type=otp*), in which short OTPs can be send to the physical lock to initiate an open or close action. For an eKey+OTPs, the *passkey* field in the response result is a dash *"-"* separated list of *nr\_of\_passkeys* OTPs.
+  
+  ## Usage
+  
+  See the *"Use of the KSC API Access Key"* section on the *"Overview"* / *"Documentation"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.
+  
+  ### Use of Variables
+  
+  Update the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).
+  
+  ### Examples
+  
+  **Example 1** - Obtain an eKey with 32 OTPs for a 24-hour rental agreement (on position 1):
+  
+  ```
+  lock_id=0102030405060708
+  position=1
+  
+  hours=24
+  nr_of_passkeys=32
+  tag=Order #2025-678
+  ```
+  
+  The top *lock\_id* and *position* variables in this example will be used in the request URL, while the other 3 variables (*hours*, *nr\_of\_passkeys*, and *tag*) will be set in the request body. Note on the *Body* tab that the *passkey\_type* and *segmented* fields are predefined in the request body JSON; they can be changed, but it is recommended to use only the eKey+OTPs approach for typical implementations.
+  
+  **Example 2** - Obtain an eKey with 16 OTPs for 8 hours on position 0 (to be used by a mechanic, servicing the bike/lock):
+  
+  ```
+  lock_id=0102030405060708
+  position=0
+  
+  hours=8
+  nr_of_passkeys=16
+  tag=Service ticket REPAIR-074
+  ```
+  
+  While examples, this shows how a mechanic could be provided a special eKey on *position=0* that could be used while the end-user in a rental agreement could use a normal eKey on *position=1* for the same bike/lock. This allows the mechanic to service the bike while the end-user is, for example, in a museum or a hotel. When serviced (and relocked by the mechanic), the end-user could continue under the existing rental agreement (using the eKey+OTPs on *position=1* already on the end-user device).
+  
+  **Example 3** - Obtain a special eKey with -1 hours to invalidate prior eKeys:
+  
+  ```
+  lock_id=0102030405060708
+  position=1
+  
+  hours=-1
+  nr_of_passkeys=1
+  tag=Invalidate prior eKeys
+  ```
+  
+  Requesting an eKey with **hours=-1** hours is a special case. To obtain an eKey that, when loaded into the physical lock, invalidates all previous ones (all eKeys with a lower *sequence*), without a new agreement starting (on this *slot\_position*).
+  
+}

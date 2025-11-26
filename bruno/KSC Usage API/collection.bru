@@ -1,0 +1,59 @@
+meta {
+  name: KSC Usage API
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth {
+  mode: apikey
+}
+
+auth:apikey {
+  key: X-API-Key
+  value: {{API_KEY}}
+  placement: header
+}
+
+vars:pre-request {
+  base_url: https://keysafe-cloud.appspot.com
+  API_KEY: {{process.env.KSC_API_KEY}}
+}
+
+script:pre-request {
+  // To keep your KSC API Access Key secret, set it in your (new) `.env` file.
+  // The `.env.example` file provides a template for your `.env` to copy and adjust.
+  // --------------------------------------------------------------------------------
+  // By default, it is then loaded in the API_KEY collection variable (see Vars tab).
+  // Though an override for API_KEY can be set in an active Bruno environment (with
+  // precedence, highest to lowests: Runtime>Request>Folder>Environment>Collection).
+  // --------------------------------------------------------------------------------
+  if (true) {
+    // Detect cases in which the API_KEY is not set correctly
+    const api_key = bru.getEnvVar("API_KEY") ?? bru.getCollectionVar("API_KEY");
+    expect(api_key, "'Couldn\'t obtain API_KEY as a variable from .env file.'").to.not.equal(undefined);
+    const api_key_spec = "{{process.env.KSC_API_KEY}}";
+    expect(api_key.slice(0, 14), "'Couldn\'t obtain API_KEY as a variable from .env file.'").to.not.equal(api_key_spec.slice(0, 14));
+  }
+  
+}
+
+docs {
+  Bruno collection for exploring the **KeySafe-Cloud (KSC)** Application Programming Interface (API).
+  
+  Please consult the full KSC API documentation for more details, as this *"KSC Usage API collection for Bruno"* (version 2.1.0 dated 2025-11-24) only explores a subset of the KSC API to get started.
+  
+  ## Usage
+  
+  The *"Use of the KSC API Access Key"* section below provides details on how to use a (new) `.env` file to set the KSC API Access Key for a specific tenant inventory.
+  
+  ### Use of the KSC API Access Key
+  
+  * Copy the `.env.example` file to a file named `.env`
+  * Edit the `.env` file and set **KSC_API_KEY=**_*SECRET*_ to your KSC API Access Key
+  * In this Bruno collection, the **KSC_API_KEY** will be loaded into the collection level **API_KEY** variable and in turn, this is used to set the **X-API-Key** header as the **Auth** method (see *Vars* and *Auth* tabs of the collection)
+  * When set correctly, the *Pre-Request* script on the collection *Script* tab will pass the `expect` clause and your tests will run with your KSC API Access Key provided via the **X-API-Key** header to the KeySafe-Cloud (KSC) services.
+  * See the https://docs.usebruno.com/secrets-management/overview link for more details about this `.env` file (aka DotEnv) approach.
+
+}

@@ -1,0 +1,49 @@
+meta {
+  name: Retrieve lock details
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/api/v1/locks/{{lock_id}}
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  lock_id: 0102030405060708
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  # Retrieve lock details
+  
+  Retrieves the details of the Lock resource, using the *lock\_id* of that lock.
+  
+  Retrieving lock details for a specific lock is limited to locks in your tenant inventory. The tenant inventory is determined by the KSC API Access Key (aka API Key) used.
+  
+  ## Usage
+  
+  See the *"Use of the KSC API Access Key"* section on the *"Overview"* / *"Documentation"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.
+  
+  Use the *"List specific lock(s)"* request with a known Lock UID to find the *lock\_id* for locks in your tenant inventory. Adding a lock to the tenant inventory can be done with the *"Claim a lock"* request; this will also return the *lock\_id* in the response.
+  
+  ### Use of Variables
+  
+  Update the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).
+  
+  ### Examples
+  
+  **Example 1** - Retrieve lock details for a specific lock:
+  
+  ```
+  lock_id=0102030405060708
+  ```
+  
+  Using this (artificial) *lock\_id* on the *Vars* tab will attempt to retrieve details for a specific lock, which is unlikely to be in your inventory (as determined via the API Key used). Thus, the **404** *"Not Found"* result is expected, and the description will help you interpret the error response.
+  
+}

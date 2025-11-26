@@ -1,0 +1,55 @@
+meta {
+  name: List specific lock(s)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/v1/locks?lock_uids={{lock_uids}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  lock_uids: {{lock_uids}}
+}
+
+vars:pre-request {
+  lock_uids: DeadBeef0000deadBEEF
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  # List specific lock(s)
+  
+  List specific Lock resources in your inventory, filtered to the **lock\_uids** query parameter. The tenant inventory is determined by the KSC API Access Key (aka API Key) used.
+  
+  ## Usage
+  
+  See the *"Use of the KSC API Access Key"* section on the *"Overview"* / *"Documentation"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.
+  
+  ### Use of Variables
+  
+  Update the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).
+  
+  ### Examples
+  
+  In the following examples, with artificial Lock UID(s), the response will likely return an empty list. Adjust to values known to work in your inventory. The Lock UID is printed on the lock label, with "-" dashes for readability; the dashes shouldn't be used here.
+  
+  **Example 1** - Searching for details on just one Lock UID, showing that the capitalization of the hexadecimal *lock\_uid* value is ignored: 
+  
+  ```
+  lock_uids=DeadBeef0000deadBEEF
+  ```
+  
+  **Example 2** - Trying to list 2 Lock UIDs, will try to select locks with these specific Lock UID values (multiple, as there is a comma-separator):
+  
+  ```
+  lock_uids=deadbeef0000deadbeef,00deadbeef00deadbeef
+  ```
+  
+}

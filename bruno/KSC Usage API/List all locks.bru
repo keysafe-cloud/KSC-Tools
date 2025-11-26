@@ -1,0 +1,37 @@
+meta {
+  name: List all locks
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/api/v1/locks
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  # List all locks
+  
+  List all Lock resources in your inventory. The tenant inventory is determined by the KSC API Access Key (aka API Key) used.
+  
+  ## Usage
+  
+  See the *"Use of the KSC API Access Key"* section on the *"Overview"* / *"Documentation"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.
+  
+  ### Use of Variables
+  
+  Update the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).
+  
+  ### Examples
+  
+  On this request as-is, there are no variables; the request will try to obtain all the locks in the tenant inventory. The tenant inventory is determined by the API Key used. So when you have a development/test tenant and a production tenant, then you have to change the API Key (in the `env` file) to list locks in the different tenant inventories.
+  
+  For new tenants, the response/result to this request will likely show an empty list of locks. Adding a lock to the tenant inventory can be done with the *"Claim a lock"* request.
+  
+}

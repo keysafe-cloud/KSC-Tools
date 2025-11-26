@@ -1,0 +1,81 @@
+meta {
+  name: Set lock status
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{base_url}}/api/v1/locks/{{lock_id}}/status
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "lock_status": "{{new_status}}",
+    "reference": "{{reference}}"
+  }
+}
+
+vars:pre-request {
+  lock_id: 0102030405060708
+  new_status: defect
+  reference: Bike repair planned
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  # Set lock status
+  
+  Set the *lock\_status* (and optionally the *reference*) of a given lock resource in your inventory. Consult the Pricing documentation for all states and their impacts/limitations.
+  
+  ## Usage
+  
+  See the *"Use of the KSC API Access Key"* section on the *"Overview"* / *"Documentation"* tab of the Collection for details on how to set the API Key in the `.env` file for a specific tenant inventory.
+  
+  ### Use of Variables
+  
+  Update the variables on the **Vars** tab, which are either converted to query parameters (see the *Params* tab) or to JSON request body settings (see the *Body* tab).
+  
+  ### Examples
+  
+  **Example 1** - Set lock status to *defect* to avoid eKeys being requested, for example, when the bike will not be rented out until the bike is repaired:
+  
+  ```
+  lock_id=0102030405060708
+  
+  new_status=defect
+  reference=Bike repair planned
+  ```
+  
+  The top *lock\_id* in this example will be used in the request URL, while the other 2 variables (*new\_status* and *reference*) will be set in the request body.
+  
+  Requesting eKeys for *defect*, *lost*, or *stolen* locks is not possible. To request an eKey for inactive locks, you will need to set the KSC lock status to *active* again. This is shown in the second example below.
+  
+  **Example 2** - Set lock status back to *active* when the bike/lock can be used again:
+  
+  ```
+  lock_id=0102030405060708
+  
+  new_status=active
+  reference=
+  ```
+  
+  Using an empty *reference* (effectively a "" string in the JSON body of the request) will clear any prior *reference*; as can be seen in the response result.
+  
+  **Example 3** - Set lock status to *stored* when the bike/lock will not be used for a long time, like in off-season months:
+  
+  ```
+  lock_id=0102030405060708
+  
+  new_status=stored
+  reference=
+  ```
+  
+  Note that requesting eKeys for *stored* locks is possible, and the lock will be set to *active* automatically. allowing the eKey to be obtained without delay (see the *"Obtain an eKey"* request).
+  
+}
