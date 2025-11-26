@@ -23,11 +23,11 @@ clean-all:
     # remove the virtual environment
     rm -rf .venv/
 
-# build the docker image for command-line
+# build the docker image for command-line scripts
 cli-build:
     docker build -t ksc/tools .
 
-# run the docker image for command-line with interactive shell
+# run the docker image for command-line scripts with interactive shell
 cli-run:
     # pass on the environment variable, as loaded from .env file
     docker run --rm -it -e KSC_API_KEY=$KSC_API_KEY ksc/tools sh
