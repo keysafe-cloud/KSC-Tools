@@ -26,7 +26,7 @@ import sys
 import requests
 from dotenv import load_dotenv
 
-from helpers.utils import obfuscate, yn_choice
+from utils import obfuscate, yn_choice
 
 
 VERSION = "1.2.2"
