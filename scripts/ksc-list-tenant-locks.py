@@ -237,6 +237,8 @@ def export_data(fname: str, fmt: str, flds: list[str], data: list[dict]) -> str:
                 # for each record provide field values on one line
                 line = ";".join([f'"{rec[fld]}"' for fld in flds])
                 lines.append(line)
+            # add empty line
+            lines.append("")
             # combine all lines with record details into CSV result
             result = "\n".join(lines)
         if fmt == "json":
