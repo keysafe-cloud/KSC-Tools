@@ -15,7 +15,6 @@ auth:apikey {
   value: {{API_KEY}}
   placement: header
 }
-
 vars:pre-request {
   base_url: https://keysafe-cloud.appspot.com
   API_KEY: {{process.env.KSC_API_KEY}}
@@ -40,6 +39,8 @@ script:pre-request {
 }
 
 docs {
+  # KSC Usage API
+  
   Bruno collection for exploring the **KeySafe-Cloud (KSC)** Application Programming Interface (API).
   
   Please consult the full KSC API documentation for more details, as this *"KSC Usage API collection for Bruno"* (version 1.2.2 dated 2025-11-26) only explores a subset of the KSC API to get started.
@@ -55,5 +56,5 @@ docs {
   * In this Bruno collection, the **KSC_API_KEY** will be loaded into the collection level **API_KEY** variable and in turn, this is used to set the **X-API-Key** header as the **Auth** method (see *Vars* and *Auth* tabs of the collection)
   * When set correctly, the *Pre-Request* script on the collection *Script* tab will pass the `expect` clause and your tests will run with your KSC API Access Key provided via the **X-API-Key** header to the KeySafe-Cloud (KSC) services.
   * See the https://docs.usebruno.com/secrets-management/overview link for more details about this `.env` file (aka DotEnv) approach.
-
+  
 }
