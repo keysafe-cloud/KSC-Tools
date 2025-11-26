@@ -1,2 +1,7 @@
 # Secrets
 .env
+
+# Output
+*.csv
+*.json
+*.xlsx
