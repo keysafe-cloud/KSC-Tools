@@ -42,7 +42,7 @@ docs {
   
   Obtain an *eKey* for a given *slot position* of a *lock* resource in your inventory.
   
-  Note that it is strongly recommended to use the *?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys* query parameter, as it will enhance the response by adding these fields into the result. Thus making it clear what the eKey+OTPs represent.
+  Note that it is recommended to use the *?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys* query parameter, as it will enhance the response by adding these fields into the result. Thus making it clear what the eKey+OTPs represent.
   
   It is also recommended for most implementation to use the eKey+OTPs approach (with *passkey_type=otp*), in which short OTPs can be send to the physical lock to initiate an open or close action. For an eKey+OTPs, the *passkey* field in the response result is a dash *"-"* separated list of *nr\_of\_passkeys* OTPs.
   
