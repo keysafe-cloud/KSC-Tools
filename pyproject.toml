@@ -1,6 +1,6 @@
 [project]
 name = "ksc-tools"
-version = "1.2.2"
+version = "1.2.4"
 license = "MIT"
 description = "Tools, hints and tips for working with the KeySafe-Cloud (KSC) API and compatible locks."
 readme = "README.md"
