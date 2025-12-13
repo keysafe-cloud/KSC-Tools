@@ -287,6 +287,7 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")
     parser.add_argument(
         "--api_key",
+        "--api",
         default=KSC_API_KEY,
         help="API Key for the tenant inventory "
         "(default: KSC_API_KEY from environment variable or specified in .env file)",
