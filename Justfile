@@ -6,8 +6,8 @@ set shell := ["bash", "-c"]
 # (to keep API Key details out of source code control)
 set dotenv-load := true
 
-# install, lint, build, and test the application
-default: install lint
+# install, lint, cli-build, and cli-run to test the application
+default: install lint cli-build cli-run
 
 # remove all artifacts
 clean-all:
