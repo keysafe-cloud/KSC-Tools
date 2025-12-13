@@ -24,7 +24,7 @@ created will follow a `list-locks-YYYY-mm-dd-HHMM.xlsx` snapshot at date/time pa
 
 NOTE: It is recommended to set the KSC API Access Key (aka API Key) in a `.env` file or via
       command-line arguments; rather than hard-coding any 'SECRET' in a copy of this script.
-      Please protect your API Key as described in the API documentation.
+      Please protect your KSC API Access Key as described in the API documentation.
 """
 
 import argparse
@@ -62,8 +62,8 @@ load_dotenv()
 #       Make sure the `.env` is excluded from source code control, for example
 #       by using a `.gitignore` entry to exclude the `.env` file.
 #
-#       It is possible to override this `.env` value with on the command-line
-#       using the `--api_key` parameter.
+#       It is possible to override this `.env` value using the command-line
+#       with the `--api_key` parameter.
 KSC_API_KEY = os.environ.get("KSC_API_KEY")
 # =============================================================================
 
