@@ -49,7 +49,7 @@ from utils import (
 )
 
 
-VERSION = "1.2.2"
+VERSION = "2.0.0"
 BASE_URL = "https://keysafe-cloud.appspot.com/api/v1"
 API_KEY_LENGTH = 32
 
