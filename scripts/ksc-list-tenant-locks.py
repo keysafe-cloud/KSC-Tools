@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-Script to list all locks in the KSC tenant inventory.
+Script to list all locks in the KeySafe-Cloud (KSC) tenant inventory.
 
 It gets all locks in the tenant inventory based on the KSC API Access Key (aka API Key) provided.
 When the amount of locks exceeds a certain limit, this script will use the next URL approach
@@ -306,7 +306,7 @@ if __name__ == "__main__":
         default=FIELDS_ARGS_DEFAULT,
         help="determine the fields to include in the output "
         '(default "id,lock_uid,lock_status,reference" provides a quick overview; '
-        'use "-" for a verbose set of fields, use "" for all fields)',
+        'use "+" for a verbose set of fields, use "*" for all fields)',
     )
     parser.add_argument(
         "--format",
@@ -331,11 +331,16 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
 
     # determine fields to be extracted
-    if args.fields.strip() in ["-"]:
+    if args.fields.strip().lower() in ["default", ""]:
+        logger.info("Received command-line option for default fields.")
+        args.fields = FIELDS_ARGS_DEFAULT
+    elif args.fields.strip().lower() in ["verbose", "+"]:
+        logger.info("Received command-line option for verbose fields.")
         args.fields = FIELDS_ARGS_VERBOSE
     # reduce fields to a unique set, while maintaining order
     flds = unique_ordered_list(list(args.fields.lower().split(",")))
-    if args.fields.strip() in ["*", ""]:
+    if args.fields.strip().lower() in ["all", "*"]:
+        logger.info("Received command-line option for all fields.")
         flds = []
         logger.debug("Requested fields: all")
     else:
