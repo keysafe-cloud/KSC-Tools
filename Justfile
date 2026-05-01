@@ -7,7 +7,11 @@ set shell := ["bash", "-c"]
 set dotenv-load := true
 
 # install, lint, cli-build, and cli-run to test the application
-default: install lint cli-build cli-run
+default: install audit lint cli-build cli-run
+
+# security audit
+audit:
+    uv run pip-audit
 
 # remove all artifacts
 clean-all:
@@ -24,7 +28,10 @@ clean-all:
     rm -rf .venv/
 
 # build the docker image for command-line scripts
+# (use --no-annotate in uv export to suppress "# via" comments)
 cli-build:
+    uv export --format requirements-txt \
+        --no-hashes --no-dev --no-header > scripts/requirements.txt
     docker build -t ksc/tools .
 
 # run the docker image for command-line scripts with interactive shell

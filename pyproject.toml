@@ -1,20 +1,21 @@
 [project]
 name = "ksc-tools"
-version = "1.2.4"
+version = "1.2.5"
 license = "MIT"
 description = "Tools, hints and tips for working with the KeySafe-Cloud (KSC) API and compatible locks."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "python-dotenv>=1.2.2",
-    "requests>=2.33.1",
-    "xlsxwriter>=3.2.9",
+    "python-dotenv~=1.2.2",
+    "requests~=2.33.1",
+    "xlsxwriter~=3.2.9",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.9",
-    "ty>=0.0.29",
+    "pip-audit>=2.10.0",
+    "ruff>=0.15.12",
+    "ty>=0.0.33",
 ]
 
 [tool.ruff]
