@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "monthly"
     # group minor/patch updates together
-    group:
+    groups:
       dependencies:
         patterns:
           - "*"
