@@ -1,0 +1,24 @@
+name: Security Audit
+
+on:
+  pull_request:
+    # only run on PRs that touch dependency files
+    paths:
+      - 'pyproject.toml'
+      - 'uv.lock'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    # optional: only run for Dependabot PRs
+    if: github.actor == 'dependabot[bot]'
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Run pip-audit
+        # use the dependency group we set up earlier
+        run: uv run --group dev pip-audit
