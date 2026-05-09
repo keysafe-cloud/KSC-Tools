@@ -36,11 +36,15 @@ import os
 import sys
 from pathlib import Path
 
-import requests
 import xlsxwriter
 from dotenv import load_dotenv
 from xlsxwriter.utility import xl_col_to_name
 
+from ksc_api import (
+    get_headers,
+    get_locks,
+    get_locks_url,
+)
 from utils import (
     ensure_file_extension,
     obfuscate,
@@ -49,9 +53,8 @@ from utils import (
 )
 
 
-VERSION = "2.0.0"
-BASE_URL = "https://keysafe-cloud.appspot.com/api/v1"
-API_KEY_LENGTH = 32
+VERSION = "2.1.0"
+SCRIPT_VERSION = f"{__name__}/{VERSION}"
 
 # load environment variables from .env file
 load_dotenv()
@@ -100,81 +103,6 @@ FIELDS_ARGS_VERBOSE = (
 # configure logging
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def get_locks_url(limit: int = 0) -> str:
-    """
-    Create query Uniform Resource Locator (URL) to obtain locks.
-
-    :param limit: maximum number of entries in one batch when requesting list
-    :return: string URL to be used when making API request for locks
-    """
-    url = BASE_URL.strip().rstrip("/") + "/locks"
-    if limit:
-        prefix = "&" if ("?" in url) else "?"
-        url = f"{url}{prefix}limit={limit}"
-    return url
-
-
-def get_headers(api_key: str) -> dict:
-    """
-    Create HTTP headers to use when making requests to the KSC API.
-
-    :param api_key: the API Key to be included in the request
-    :return: dictionary to be used as headers when making API requests
-    """
-    tenant_api_key = api_key.strip()
-    if len(tenant_api_key) != API_KEY_LENGTH:
-        logger.warning("Unexpected length of API Key, please adjust!")
-        sys.exit(1)
-    # identify the script and the requests library used
-    script_ver = f"list-tenant-locks/{VERSION}"
-    requests_ver = f"python-requests/{requests.__version__}"
-    return {
-        "X-Api-Key": tenant_api_key.strip(),
-        "Accept-Encoding": "gzip,deflate",
-        "Content-Type": "application/json",
-        "User-Agent": f"{script_ver}; {requests_ver}; gzip",
-    }
-
-
-def get_locks(url: str, headers: dict) -> tuple[int, list[dict]]:
-    """
-    Request all locks for tenant inventory (associated with API key in headers).
-
-    Handles any batch processing as required via URL (see "List all locks").
-
-    :param url: the URL to be used in the HTTP request
-    :param headers: headers to be used in HTTP request
-    :return: number of requests executed and list of all locks in tenant inventory (if any)
-    """
-    r_count = 0
-    data = None
-    lst = []
-    while url:
-        r_count += 1
-        try:
-            logger.debug(f"HTTP Request URL: {url}")
-            r = requests.get(url, headers=headers, json=data, timeout=10)
-        except requests.exceptions.ConnectionError:
-            logger.exception("Connection error.")
-            sys.exit(1)
-        try:
-            r_data = r.json()
-            # obtain url for next set of locks (if any)
-            url = r_data.get("next_url", "")
-            # get the lock(s) from result (if any)
-            result = r_data.get("result", [])
-            if isinstance(result, dict):
-                lst.append(result)
-            else:
-                lst.extend(result)
-        except requests.exceptions.RequestException:
-            logger.exception("Request exception.")
-            if r and r.text:
-                logger.warning(r.text)
-            sys.exit(1)
-    return r_count, lst
 
 
 def export_xlsx(fname: str, flds: list[str], data: list[dict]) -> None:
@@ -368,7 +296,7 @@ if __name__ == "__main__":
     else:
         logger.error("No KSC_API_KEY set in environment, .env file, or provided via arguments!")
         sys.exit(1)
-    headers = get_headers(args.api_key)
+    headers = get_headers(args.api_key, SCRIPT_VERSION)
     _headers = headers.copy()
     if _headers:
         # protect the API Key by obfuscating it in the logs

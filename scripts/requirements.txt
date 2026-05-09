@@ -8,7 +8,7 @@ python-dotenv==1.2.2
     # via ksc-tools
 requests==2.33.1
     # via ksc-tools
-urllib3==2.6.3
+urllib3==2.7.0
     # via requests
 xlsxwriter==3.2.9
     # via ksc-tools
