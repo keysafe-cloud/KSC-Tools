@@ -37,7 +37,7 @@ cli-build:
 # run the docker image for command-line scripts with interactive shell
 cli-run:
     # pass on the environment variable, as loaded from .env file
-    docker run --rm -it -e KSC_API_KEY=$KSC_API_KEY ksc/tools sh
+    docker run --rm -it -e KSC_API_KEY=$KSC_API_KEY ksc/tools bash
 
 # install dependencies
 install:
