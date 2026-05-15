@@ -1,0 +1,12 @@
+.vscode
+*~
+*.pyc
+*.zip
+*.7z
+.git/
+.github/
+.env
+.venv/
+.ruff_cache/
+postman/
+*collection.json
