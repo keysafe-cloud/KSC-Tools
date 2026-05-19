@@ -1,0 +1,24 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml                # Validates YAML syntax
+      - id: check-added-large-files   # Prevents accidental large binary commits
+      - id: end-of-file-fixer         # Ensures files end with a newline
+      - id: trailing-whitespace       # Removes unnecessary whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.12
+    hooks:
+      - id: ruff                      # Runs ruff linting
+      - id: ruff-format               # Runs ruff formatting (replaces black/isort)
+
+  - repo: local
+    hooks:
+      - id: pip-audit
+        name: pip-audit
+        entry: uv run pip-audit
+        language: system
+        pass_filenames: false
+        always_run: true
