@@ -14,13 +14,14 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pip-audit>=2.10.0",
-    "ruff>=0.15.12",
-    "ty>=0.0.33",
+    "pre-commit>=4.6.0",
+    "ruff>=0.15.13",
+    "ty>=0.0.37",
 ]
 
 [tool.ruff]
 src = ["scripts"]
-include = ["pyroject.toml", "scripts/**/*.py"]
+include = ["pyproject.toml", "scripts/**/*.py"]
 line-length = 100
 target-version = "py312"
 extend-exclude = ["bin"]
@@ -56,3 +57,5 @@ lines-after-imports = 2
 
 [tool.ty.environment]
 root = ["scripts"]
+
+
