@@ -35,26 +35,26 @@ script:pre-request {
     const api_key_spec = "{{process.env.KSC_API_KEY}}";
     expect(api_key.slice(0, 14), "'Couldn\'t obtain API_KEY as a variable from .env file.'").to.not.equal(api_key_spec.slice(0, 14));
   }
-  
+
 }
 
 docs {
   # KSC Usage API
-  
+
   Bruno collection for exploring the **KeySafe-Cloud (KSC)** Application Programming Interface (API).
-  
+
   Please consult the full KSC API documentation for more details, as this *"KSC Usage API collection for Bruno"* (version 1.2.4 dated 2025-11-27) only explores a subset of the KSC API to get started.
-  
+
   ## Usage
-  
+
   The *"Use of the KSC API Access Key"* section below provides details on how to use a (new) `.env` file to set the KSC API Access Key for a specific tenant inventory.
-  
+
   ### Use of the KSC API Access Key
-  
+
   * Copy the `.env.example` file to a file named `.env`
   * Edit the `.env` file and set **KSC_API_KEY=**_*SECRET*_ to your KSC API Access Key
   * In this Bruno collection, the **KSC_API_KEY** will be loaded into the collection level **API_KEY** variable and in turn, this is used to set the **X-API-Key** header as the **Auth** method (see *Vars* and *Auth* tabs of the collection)
   * When set correctly, the *Pre-Request* script on the collection *Script* tab will pass the `expect` clause and your tests will run with your KSC API Access Key provided via the **X-API-Key** header to the KeySafe-Cloud (KSC) services.
   * See the https://docs.usebruno.com/secrets-management/overview link for more details about this `.env` file (aka DotEnv) approach.
-  
+
 }

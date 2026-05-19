@@ -209,7 +209,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "pip-audit", specifier = ">=2.10.0" },
-    { name = "pre-commit", specifier = ">=3.0.0" },
+    { name = "pre-commit", specifier = ">=4.6.0" },
     { name = "ruff", specifier = ">=0.15.13" },
     { name = "ty", specifier = ">=0.0.37" },
 ]
