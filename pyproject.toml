@@ -13,10 +13,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pip-audit>=2.10.0",
+    "pip-audit>=2.10.1",
     "pre-commit>=4.6.0",
-    "ruff>=0.15.15",
-    "ty>=0.0.42",
+    "ruff>=0.15.20",
+    "ty>=0.0.55",
 ]
 
 [tool.ruff]
