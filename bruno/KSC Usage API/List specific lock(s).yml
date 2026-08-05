@@ -1,29 +1,29 @@
-meta {
+info:
   name: List specific lock(s)
   type: http
   seq: 2
-}
 
-get {
-  url: {{base_url}}/api/v1/locks?lock_uids={{lock_uids}}
-  body: none
+http:
+  method: GET
+  url: "{{base_url}}/api/v1/locks?lock_uids={{lock_uids}}"
+  params:
+    - name: lock_uids
+      value: "{{lock_uids}}"
+      type: query
   auth: inherit
-}
 
-params:query {
-  lock_uids: {{lock_uids}}
-}
+runtime:
+  variables:
+    - name: lock_uids
+      value: DeadBeef0000deadBEEF
 
-vars:pre-request {
-  lock_uids: DeadBeef0000deadBEEF
-}
-
-settings {
+settings:
   encodeUrl: true
   timeout: 0
-}
+  followRedirects: true
+  maxRedirects: 5
 
-docs {
+docs: |
   # List specific lock(s)
 
   List specific Lock resources in your inventory, filtered to the **lock\_uids** query parameter. The tenant inventory is determined by the KSC API Access Key (aka API Key) used.
@@ -51,5 +51,3 @@ docs {
   ```
   lock_uids=deadbeef0000deadbeef,00deadbeef00deadbeef
   ```
-
-}

@@ -1,35 +1,37 @@
-meta {
+info:
   name: Claim a lock
   type: http
   seq: 4
-}
 
-post {
-  url: {{base_url}}/api/v1/locks
-  body: json
+http:
+  method: POST
+  url: "{{base_url}}/api/v1/locks"
+  body:
+    type: json
+    data: |-
+      {
+        "claim_code": "{{claim_code}}",
+        "lock_uid": "{{lock_uid}}",
+        "reference": "{{reference}}"
+      }
   auth: inherit
-}
 
-body:json {
-  {
-    "claim_code": "{{claim_code}}",
-    "lock_uid": "{{lock_uid}}",
-    "reference": "{{reference}}"
-  }
-}
+runtime:
+  variables:
+    - name: lock_uid
+      value: deadbeef0000deadbeef
+    - name: claim_code
+      value: deadbeef00deadbeef01deadbeef0203
+    - name: reference
+      value: Test
 
-vars:pre-request {
-  lock_uid: deadbeef0000deadbeef
-  claim_code: deadbeef00deadbeef01deadbeef0203
-  reference: Test
-}
-
-settings {
+settings:
   encodeUrl: true
   timeout: 0
-}
+  followRedirects: true
+  maxRedirects: 5
 
-docs {
+docs: |
   # Claim a lock
 
   Demonstrates how to claim a lock into your tenant inventory (as specified by the API Access Key used). It requires information from the QR/DM code printed on the lock label: in "AXA-*<lock\_uid>*-*<claim\_code>*" format.
@@ -63,5 +65,3 @@ docs {
   Scan the QR/DM-code on the label of a lock to get the "AXA-*<lock\_uid>*-*<claim\_code>*" to use for claiming that lock.
 
   Note that when a lock is claimed into a specific tenant inventory, it cannot be claimed by/into another tenant unless the lock is specifically set to *"transferable"* first (via the *"Set lock status"* request). Claiming an already claimed lock into the same tenant inventory will work (changing the *reference* when specified in the request).
-
-}

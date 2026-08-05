@@ -1,34 +1,36 @@
-meta {
+info:
   name: Set lock status
   type: http
   seq: 6
-}
 
-put {
-  url: {{base_url}}/api/v1/locks/{{lock_id}}/status
-  body: json
+http:
+  method: PUT
+  url: "{{base_url}}/api/v1/locks/{{lock_id}}/status"
+  body:
+    type: json
+    data: |-
+      {
+        "lock_status": "{{new_status}}",
+        "reference": "{{reference}}"
+      }
   auth: inherit
-}
 
-body:json {
-  {
-    "lock_status": "{{new_status}}",
-    "reference": "{{reference}}"
-  }
-}
+runtime:
+  variables:
+    - name: lock_id
+      value: "0102030405060708"
+    - name: new_status
+      value: defect
+    - name: reference
+      value: Bike repair planned
 
-vars:pre-request {
-  lock_id: 0102030405060708
-  new_status: defect
-  reference: Bike repair planned
-}
-
-settings {
+settings:
   encodeUrl: true
   timeout: 0
-}
+  followRedirects: true
+  maxRedirects: 5
 
-docs {
+docs: |
   # Set lock status
 
   Set the *lock\_status* (and optionally the *reference*) of a given lock resource in your inventory. Consult the Pricing documentation for all states and their impacts/limitations.
@@ -77,5 +79,3 @@ docs {
   ```
 
   Note that requesting eKeys for *stored* locks is possible, and the lock will be set to *active* automatically. allowing the eKey to be obtained without delay (see the *"Obtain an eKey"* request).
-
-}

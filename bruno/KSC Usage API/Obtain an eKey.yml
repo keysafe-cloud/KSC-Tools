@@ -1,43 +1,53 @@
-meta {
+info:
   name: Obtain an eKey
   type: http
   seq: 5
-}
 
-put {
-  url: {{base_url}}/api/v1/locks/{{lock_id}}/slots/{{position}}?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys
-  body: json
+http:
+  method: PUT
+  url: "{{base_url}}/api/v1/locks/{{lock_id}}/slots/{{position}}?opt_fields=hours,lock_id,lock_uid,nr_of_passkeys"
+  params:
+    - name: opt_fields
+      value: hours,lock_id,lock_uid,nr_of_passkeys
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "hours": {{hours}},
+        "nr_of_passkeys": {{nr_of_passkeys}},
+        "passkey_type": "otp",
+        "segmented": true,
+        "tag": "{{tag}}"
+      }
   auth: inherit
-}
 
-params:query {
-  opt_fields: hours,lock_id,lock_uid,nr_of_passkeys
-}
+runtime:
+  variables:
+    - name: lock_id
+      value: "0102030405060708"
+    - name: position
+      value:
+        type: number
+        data: "1"
+    - name: hours
+      value:
+        type: number
+        data: "24"
+    - name: nr_of_passkeys
+      value:
+        type: number
+        data: "32"
+    - name: tag
+      value: Order 2026-789
 
-body:json {
-  {
-    "hours": {{hours}},
-    "nr_of_passkeys": {{nr_of_passkeys}},
-    "passkey_type": "otp",
-    "segmented": true,
-    "tag": "{{tag}}"
-  }
-}
-
-vars:pre-request {
-  lock_id: 0102030405060708
-  position: 1
-  hours: 24
-  nr_of_passkeys: 32
-  tag: Order #2025-678
-}
-
-settings {
+settings:
   encodeUrl: true
   timeout: 0
-}
+  followRedirects: true
+  maxRedirects: 5
 
-docs {
+docs: |
   # Obtain an eKey
 
   Obtain an *eKey* for a given *slot position* of a *lock* resource in your inventory.
@@ -64,7 +74,7 @@ docs {
 
   hours=24
   nr_of_passkeys=32
-  tag=Order #2025-678
+  tag=Order 2026-789
   ```
 
   The top *lock\_id* and *position* variables in this example will be used in the request URL, while the other 3 variables (*hours*, *nr\_of\_passkeys*, and *tag*) will be set in the request body. Note on the *Body* tab that the *passkey\_type* and *segmented* fields are predefined in the request body JSON; they can be changed, but it is recommended to use only the eKey+OTPs approach for typical implementations.
@@ -94,5 +104,3 @@ docs {
   ```
 
   Requesting an eKey with **hours=-1** hours is a special case. To obtain an eKey that, when loaded into the physical lock, invalidates all previous ones (all eKeys with a lower *sequence*), without a new agreement starting (on this *slot\_position*).
-
-}
