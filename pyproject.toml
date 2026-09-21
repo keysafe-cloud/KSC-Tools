@@ -1,6 +1,6 @@
 [project]
 name = "ksc-tools"
-version = "1.2.8"
+version = "1.2.9"
 license = "MIT"
 description = "Tools, hints and tips for working with the KeySafe-Cloud (KSC) API and compatible locks."
 readme = "README.md"
@@ -15,8 +15,8 @@ dependencies = [
 dev = [
     "pip-audit>=2.10.1",
     "pre-commit>=4.6.2",
-    "ruff>=0.16.6",
-    "ty>=0.0.78",
+    "ruff>=0.16.8",
+    "ty>=0.0.82",
 ]
 
 [tool.ruff]
