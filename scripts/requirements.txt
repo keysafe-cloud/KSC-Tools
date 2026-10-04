@@ -1,10 +1,10 @@
 certifi==2026.7.22
     # via requests
-charset-normalizer==3.5.1
+charset-normalizer==3.5.2
     # via requests
 idna==3.20
     # via requests
-python-dotenv==1.2.3
+python-dotenv==1.2.4
     # via ksc-tools
 requests==2.34.2
     # via ksc-tools
