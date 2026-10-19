@@ -18,7 +18,7 @@ NOTE: It is recommended to set the KSC API Access Key (aka API Key) in a `.env` 
 """
 
 import argparse
-import datetime
+import datetime as dt
 import logging
 import os
 import sys
@@ -126,7 +126,7 @@ def set_locks_stored(locks: list[dict], headers: dict) -> int:
 
 
 if __name__ == "__main__":
-    dt_now = datetime.datetime.now(datetime.UTC).astimezone()
+    dt_now = dt.datetime.now(dt.UTC).astimezone()
     # configure command-line parsing
     parser = argparse.ArgumentParser(description="Set locks from 'active' to 'stored' status.")
     parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")

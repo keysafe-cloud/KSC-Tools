@@ -29,7 +29,7 @@ NOTE: It is recommended to set the KSC API Access Key (aka API Key) in a `.env` 
 
 import argparse
 import copy
-import datetime
+import datetime as dt
 import json
 import logging
 import os
@@ -209,7 +209,7 @@ def reduce_data(data: list[dict], flds: list[str]) -> tuple[list[dict], list[str
 
 
 if __name__ == "__main__":
-    dt_now = datetime.datetime.now(datetime.UTC).astimezone()
+    dt_now = dt.datetime.now(dt.UTC).astimezone()
     # configure command-line parsing
     parser = argparse.ArgumentParser(description="List all locks in the tenant inventory.")
     parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")
