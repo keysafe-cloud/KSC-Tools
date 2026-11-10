@@ -15,8 +15,8 @@ dependencies = [
 dev = [
     "pip-audit>=2.10.1",
     "pre-commit>=4.7.0",
-    "ruff>=0.17.3",
-    "ty>=0.0.97",
+    "ruff>=0.17.4",
+    "ty>=0.0.100",
 ]
 
 [tool.ruff]
