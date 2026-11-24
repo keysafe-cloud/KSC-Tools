@@ -1,6 +1,6 @@
 certifi==2026.11.20
     # via requests
-charset-normalizer==3.5.2
+charset-normalizer==3.5.3
     # via requests
 idna==3.20
     # via requests
@@ -10,5 +10,5 @@ requests==2.34.2
     # via ksc-tools
 urllib3==2.8.0
     # via requests
-xlsxwriter==3.3.3
+xlsxwriter==3.3.4
     # via ksc-tools
